@@ -1,0 +1,130 @@
+"use client";
+import Link from "next/link";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import type { Project } from "@/types/project";
+import { ProjectCard } from "./ProjectCard";
+import { EASE, useDesktopPointer, useReducedMotion } from "./Motion";
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } },
+};
+
+/**
+ * Galeria horizontal guiada pelo scroll vertical.
+ * Desktop (mouse + ≥1024px): a seção fica presa (sticky) e a faixa de cases
+ * atravessa a tela conforme o usuário rola — distância de scroll 1:1 com o
+ * deslocamento horizontal, para nunca perder o controle da página.
+ * Touch / telas menores / reduced motion: carrossel nativo com swipe e snap.
+ */
+export function HorizontalGallery({
+  projects,
+  eyebrow,
+  title,
+  description,
+}: {
+  projects: Project[];
+  eyebrow: string;
+  title: React.ReactNode;
+  description?: string;
+}) {
+  const outer = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const desktop = useDesktopPointer();
+  const reduced = useReducedMotion();
+  const pinned = desktop && !reduced;
+  const [distance, setDistance] = useState(0);
+
+  // Mede quanto a faixa excede a viewport; define a altura da seção.
+  useEffect(() => {
+    if (!pinned) return;
+    const el = track.current;
+    if (!el) return;
+    const measure = () =>
+      setDistance(Math.max(0, el.scrollWidth - window.innerWidth));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [pinned, projects.length]);
+
+  const { scrollYProgress } = useScroll({
+    target: outer,
+    offset: ["start start", "end end"],
+  });
+  const eased = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    mass: 0.4,
+  });
+  const x = useTransform(eased, (p) => (pinned ? -p * distance : 0));
+
+  return (
+    <section
+      ref={outer}
+      className={`hgal ${pinned ? "pinned" : ""}`}
+      style={pinned ? { height: `calc(100vh + ${distance}px)` } : undefined}
+      aria-label="Mais projetos"
+      data-tone="projects"
+    >
+      <div className="hgal-sticky">
+        <motion.div
+          ref={track}
+          className="hgal-track"
+          style={{ x }}
+          initial={reduced ? false : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.12 } },
+          }}
+        >
+          <div className="hgal-intro">
+            <div className="eyebrow">{eyebrow}</div>
+            <h2>{title}</h2>
+            {description && <p>{description}</p>}
+            <span className="hgal-hint" aria-hidden="true">
+              {pinned ? "Continue rolando" : "Arraste para o lado"}{" "}
+              <ArrowRight size={14} />
+            </span>
+          </div>
+          {projects.map((p, i) => (
+            <motion.div
+              key={p.id}
+              className="hgal-item"
+              variants={itemVariants}
+            >
+              <ProjectCard
+                project={p}
+                index={i + 2}
+                layout="compact"
+                counter={`${String(i + 3).padStart(2, "0")} / ${String(projects.length + 2).padStart(2, "0")}`}
+              />
+            </motion.div>
+          ))}
+          <div className="hgal-end">
+            <Link href="/projetos" className="hgal-all">
+              <span>Ver todos os projetos</span>
+              <ArrowUpRight size={22} />
+            </Link>
+          </div>
+        </motion.div>
+        {pinned && (
+          <div className="hgal-progress" aria-hidden="true">
+            <motion.div
+              className="hgal-progress-fill"
+              style={{ scaleX: eased }}
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
