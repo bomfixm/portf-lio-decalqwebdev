@@ -31,7 +31,7 @@ const seq = (i: number) => ({
 });
 
 const stats = [
-  { value: projects.length, label: "Cases" },
+  { value: projects.filter((p) => !p.demo).length, label: "Cases" },
   { value: services.length, label: "Frentes" },
   {
     value: technologyGroups.reduce((n, g) => n + g.items.length, 0),

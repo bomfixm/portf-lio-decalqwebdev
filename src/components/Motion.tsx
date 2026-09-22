@@ -23,7 +23,7 @@ import {
  * renderização do cliente usam `fallback`; o valor real entra em seguida
  * via useSyncExternalStore.
  */
-function useMediaQuery(query: string, fallback = false): boolean {
+export function useMediaQuery(query: string, fallback = false): boolean {
   const subscribe = useCallback(
     (cb: () => void) => {
       const mq = window.matchMedia(query);
@@ -41,11 +41,6 @@ function useMediaQuery(query: string, fallback = false): boolean {
 
 export function useReducedMotion(): boolean {
   return useMediaQuery("(prefers-reduced-motion: reduce)");
-}
-
-/** Mouse + tela larga: onde valem parallax, magnetic e a galeria pinada. */
-export function useDesktopPointer(): boolean {
-  return useMediaQuery("(min-width: 1024px) and (pointer: fine)");
 }
 
 /* Tokens de movimento compartilhados por todos os componentes. */

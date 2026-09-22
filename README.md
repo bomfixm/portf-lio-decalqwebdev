@@ -26,7 +26,7 @@ O projeto usa exportação estática. O build gera `out/`, pronto para uma hospe
 Edite `src/config/site.ts`:
 
 - `name`, `slogan`, `description`: identidade e metadados gerais.
-- `logo`: caminho de um arquivo em `public/`, por exemplo `/brand/logo.svg`. Vazio usa o símbolo tipográfico inicial.
+- `logo`: caminho de um arquivo em `public/` (atual: `/brand/logo.png`, 36px de altura no header). Vazio usa o símbolo tipográfico inicial. O favicon é `src/app/icon.png`.
 - `accent`: cor de destaque. Os demais tokens estão no início de `src/app/globals.css`.
 - `email`, `whatsapp`, `instagram`, `linkedin`, `github`: canais reais. Canais vazios não aparecem. No WhatsApp, use código do país + DDD + número.
 - `url`: domínio canônico. Pode ser definido em `NEXT_PUBLIC_SITE_URL` no ambiente de build.
@@ -37,7 +37,7 @@ Edite `src/config/site.ts`:
 
 Os tokens ficam no início de `src/app/globals.css` e são a única fonte de cor, tipografia, raio e movimento:
 
-- Cores: `--background*`, `--surface*`, `--primary*` (lime), `--secondary` (teal), `--tertiary` (lavanda), `--text-*`, `--border*`, `--glow*` e os gradientes `--gradient-primary`, `--gradient-text`, `--gradient-border`, `--gradient-background`.
+- Cores: `--background*`, `--surface*`, `--primary*` (azul), `--secondary` (ciano), `--tertiary` (lavanda), `--text-*`, `--border*`, `--glow*` e os gradientes `--gradient-primary`, `--gradient-text`, `--gradient-border`, `--gradient-background`.
 - Tipografia (via `next/font`, self-hosted): Space Grotesk para títulos (`--font-display`), DM Sans para texto (`--font-sans`) e JetBrains Mono para eyebrows e rótulos (`--font-mono`). Classes utilitárias: `.eyebrow`, `.gradient-text`, `.muted`.
 - Forma e ritmo: `--radius-*`, `--section-y`, `--gutter`, `--container`.
 - Movimento: `--ease-out`, `--dur-*` no CSS e `EASE`/`DUR` em `src/components/Motion.tsx`.
@@ -53,7 +53,7 @@ As primitivas em `src/components/Motion.tsx`:
 
 Camadas decorativas: `Background` (luzes, grid e grain fixos; seções com `data-tone` mudam qual luz domina ao entrar no centro da tela), `CursorGlow` (só com mouse), `Ticker` (faixa de capacidades gerada dos dados) e `SpotlightCard` (spotlight e borda em gradiente seguindo o mouse nos cards).
 
-Componentes de experiência: `Button` (`PrimaryButton`/`SecondaryButton`/`TextButton`, com luz que segue o ponteiro via `--mx/--my`), `Magnetic` (hover magnético sutil, só desktop), `RevealImage` (imagem assenta de 1.08 → 1 ao revelar), `HorizontalGallery` (desktop: seção presa e cases atravessando a tela com o scroll; toque/telas menores/reduced motion: carrossel com swipe e snap) e `FeaturedProjects` (case 01 em largura total, 02 invertido).
+Componentes de experiência: `Button` (`PrimaryButton`/`SecondaryButton`/`TextButton`, com luz que segue o ponteiro via `--mx/--my`), `Magnetic` (hover magnético sutil, só desktop), `CursorCta` (CTA final: selo que segue o cursor no desktop, botão estático único no toque), `RevealImage` (imagem assenta de 1.08 → 1 ao revelar), `HorizontalGallery` (desktop: seção presa e cases atravessando a tela com o scroll; toque/telas menores/reduced motion: carrossel com swipe e snap) e `FeaturedProjects` (case 01 em largura total, 02 invertido).
 
 Tipos compartilhados ficam em `src/types/` (`Project`, `Service`, `ProcessStep`, `TechnologyGroup`, `NavigationItem`, `Principle`); os dados usam `satisfies` para manter os literais.
 

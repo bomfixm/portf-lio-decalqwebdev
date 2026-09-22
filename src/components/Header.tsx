@@ -21,7 +21,14 @@ export function Brand() {
   return (
     <Link href="/" className="brand" aria-label={`${siteConfig.name}, início`}>
       {siteConfig.logo ? (
-        <Image src={siteConfig.logo} alt="" width={34} height={34} />
+        <Image
+          src={siteConfig.logo}
+          alt=""
+          width={54}
+          height={36}
+          className="brand-logo"
+          priority
+        />
       ) : (
         <span className="brand-mark" aria-hidden="true">
           ✳

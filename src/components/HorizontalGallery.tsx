@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import type { Project } from "@/types/project";
 import { ProjectCard } from "./ProjectCard";
-import { EASE, useDesktopPointer, useReducedMotion } from "./Motion";
+import { EASE, useMediaQuery, useReducedMotion } from "./Motion";
 
 const itemVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -14,10 +14,14 @@ const itemVariants = {
 
 /**
  * Galeria horizontal guiada pelo scroll vertical.
- * Desktop (mouse + ≥1024px): a seção fica presa (sticky) e a faixa de cases
- * atravessa a tela conforme o usuário rola — distância de scroll 1:1 com o
- * deslocamento horizontal, para nunca perder o controle da página.
- * Touch / telas menores / reduced motion: carrossel nativo com swipe e snap.
+ *
+ * ≥768px: a seção ganha altura extra (100vh + distância) e o viewport fica
+ * sticky; o progresso vertical da seção vira translateX do trilho. A distância
+ * é medida do conteúdo real (scrollWidth - clientWidth) e recalculada em
+ * resize, então o último card sempre termina totalmente visível antes de a
+ * página voltar ao fluxo vertical. Nada de preventDefault no wheel.
+ *
+ * <768px: carrossel nativo com swipe e scroll-snap.
  */
 export function HorizontalGallery({
   projects,
@@ -31,22 +35,24 @@ export function HorizontalGallery({
   description?: string;
 }) {
   const outer = useRef<HTMLElement>(null);
+  const sticky = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
-  const desktop = useDesktopPointer();
+  const pinned = useMediaQuery("(min-width: 768px)");
   const reduced = useReducedMotion();
-  const pinned = desktop && !reduced;
   const [distance, setDistance] = useState(0);
 
-  // Mede quanto a faixa excede a viewport; define a altura da seção.
+  // Mede quanto o trilho excede o viewport; define a altura da seção.
   useEffect(() => {
     if (!pinned) return;
-    const el = track.current;
-    if (!el) return;
+    const trackEl = track.current;
+    const stickyEl = sticky.current;
+    if (!trackEl || !stickyEl) return;
     const measure = () =>
-      setDistance(Math.max(0, el.scrollWidth - window.innerWidth));
+      setDistance(Math.max(0, trackEl.scrollWidth - stickyEl.clientWidth));
     measure();
     const ro = new ResizeObserver(measure);
-    ro.observe(el);
+    ro.observe(trackEl);
+    ro.observe(stickyEl);
     window.addEventListener("resize", measure);
     return () => {
       ro.disconnect();
@@ -59,9 +65,9 @@ export function HorizontalGallery({
     offset: ["start start", "end end"],
   });
   const eased = useSpring(scrollYProgress, {
-    stiffness: 120,
+    stiffness: 140,
     damping: 30,
-    mass: 0.4,
+    mass: 0.3,
   });
   const x = useTransform(eased, (p) => (pinned ? -p * distance : 0));
 
@@ -73,7 +79,7 @@ export function HorizontalGallery({
       aria-label="Mais projetos"
       data-tone="projects"
     >
-      <div className="hgal-sticky">
+      <div className="hgal-sticky" ref={sticky}>
         <motion.div
           ref={track}
           className="hgal-track"

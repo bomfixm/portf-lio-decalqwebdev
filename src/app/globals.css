@@ -2,39 +2,39 @@
 
 /* =========================================================================
    DESIGN TOKENS
-   A identidade original (fundo quase preto + lime #c3f294) é mantida e
-   expandida em um sistema: variações, glow, gradientes, glass e bordas.
+   Identidade: fundo azul-marinho profundo + destaque azul #6ea8ff, organizada
+   em um sistema: variações, glow, gradientes, glass e bordas.
    `--accent` continua sendo definido pelo siteConfig no <html>.
    ========================================================================= */
 :root {
   /* Brand */
-  --accent: #c3f294;
-  --accent-rgb: 195 242 148;
+  --accent: #6ea8ff;
+  --accent-rgb: 110 168 255;
   --primary: var(--accent);
   --primary-rgb: var(--accent-rgb);
-  --primary-light: #dcffb8;
-  --primary-dark: #9ad167;
-  --primary-deep: #4f7d2d;
-  --secondary: #8fc4d0;
-  --secondary-rgb: 143 196 208;
+  --primary-light: #a3c8ff;
+  --primary-dark: #3d86f0;
+  --primary-deep: #1f4fb0;
+  --secondary: #7fd8d4;
+  --secondary-rgb: 127 216 212;
   --tertiary: #b5a2ec;
   --tertiary-rgb: 181 162 236;
 
   /* Backgrounds & surfaces */
-  --background: #070708;
-  --background-secondary: #0b0c0b;
-  --background-tertiary: #101110;
-  --surface: #121313;
-  --surface-hover: #181918;
-  --surface-elevated: #1c1d1c;
+  --background: #0d1628;
+  --background-secondary: #111c32;
+  --background-tertiary: #162440;
+  --surface: #15213a;
+  --surface-hover: #1a2846;
+  --surface-elevated: #1f2f52;
   --surface-glass: rgba(255, 255, 255, 0.03);
   --surface-glass-hover: rgba(255, 255, 255, 0.055);
 
   /* Text */
-  --text-primary: #f5f5f3;
-  --text-secondary: #a9a9ae;
-  --text-tertiary: #78787e;
-  --text-on-primary: #0b1204;
+  --text-primary: #f3f6fc;
+  --text-secondary: #aab6cc;
+  --text-tertiary: #7b8aa5;
+  --text-on-primary: #06122b;
 
   /* Borders */
   --border: rgba(255, 255, 255, 0.08);
@@ -69,9 +69,9 @@
   );
   --gradient-background: linear-gradient(
     180deg,
-    #0b0c0b 0%,
+    #122040 0%,
     var(--background) 45%,
-    #060607 100%
+    #0a1223 100%
   );
   --gradient-line: linear-gradient(
     90deg,
@@ -664,7 +664,7 @@ html.lenis body {
     box-shadow var(--dur-slow) var(--ease-out);
 }
 .header.scrolled {
-  background: rgba(7, 7, 8, 0.72);
+  background: rgba(13, 22, 40, 0.72);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   border-color: var(--border);
@@ -691,6 +691,15 @@ html.lenis body {
   font-weight: 600;
   white-space: nowrap;
   text-transform: uppercase;
+}
+.brand-logo {
+  height: 36px;
+  width: auto;
+  filter: drop-shadow(0 0 14px rgb(var(--primary-rgb) / 0.35));
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.brand:hover .brand-logo {
+  transform: translateY(-1px) rotate(-3deg);
 }
 .brand-mark {
   width: 34px;
@@ -976,7 +985,7 @@ html.lenis body {
   top: 44px;
   left: 0;
   width: 100%;
-  background: linear-gradient(180deg, #151716, #101211);
+  background: linear-gradient(180deg, #182842, #12203a);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   box-shadow:
@@ -1170,7 +1179,7 @@ html.lenis body {
   right: -16px;
   bottom: 28px;
   width: 78%;
-  background: rgba(20, 22, 21, 0.86);
+  background: rgba(21, 33, 58, 0.86);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1248,7 +1257,7 @@ html.lenis body {
   gap: 8px;
   padding: 8px 12px;
   border-radius: var(--radius-full);
-  background: rgba(18, 19, 19, 0.85);
+  background: rgba(21, 33, 58, 0.85);
   border: 1px solid var(--border-strong);
   backdrop-filter: blur(10px);
   font-family: var(--font-mono, var(--font-mono-fallback));
@@ -1278,7 +1287,7 @@ html.lenis body {
   position: relative;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 20px 0;
+  padding: 14px 0;
   overflow: hidden;
   mask-image: linear-gradient(
     90deg,
@@ -1300,17 +1309,32 @@ html.lenis body {
     transparent
   );
 }
+.ticker-row {
+  --ticker-duration: 44s;
+  --ticker-gap: 56px;
+  overflow: hidden;
+  padding: 8px 0;
+}
+.ticker-row.reverse {
+  --ticker-duration: 58s;
+}
 .ticker-track {
   display: flex;
-  gap: 56px;
+  gap: 0; /* sem gap entre os grupos: -50% = exatamente um grupo */
   width: max-content;
-  animation: ticker 64s linear infinite;
+  will-change: transform;
+  animation: ticker var(--ticker-duration) linear infinite;
+}
+.ticker-row.reverse .ticker-track {
+  animation-direction: reverse;
 }
 .ticker-group {
   display: flex;
-  gap: inherit;
+  flex-shrink: 0;
+  gap: var(--ticker-gap);
+  padding-right: var(--ticker-gap); /* fecha o loop sem salto */
 }
-.ticker:hover .ticker-track {
+.ticker-row:hover .ticker-track {
   animation-play-state: paused;
 }
 .ticker-item {
@@ -1332,8 +1356,11 @@ html.lenis body {
   box-shadow: 0 0 10px var(--glow);
 }
 @keyframes ticker {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
   to {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
@@ -1503,7 +1530,7 @@ html.lenis body {
   background: linear-gradient(
     180deg,
     transparent 55%,
-    rgba(7, 7, 8, 0.55) 100%
+    rgba(13, 22, 40, 0.55) 100%
   );
   pointer-events: none;
 }
@@ -1514,7 +1541,7 @@ html.lenis body {
   z-index: 2;
   width: 40px;
   height: 40px;
-  background: rgba(10, 11, 11, 0.7);
+  background: rgba(15, 24, 42, 0.7);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
@@ -1546,7 +1573,7 @@ html.lenis body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-primary);
-  background: rgba(10, 11, 11, 0.7);
+  background: rgba(15, 24, 42, 0.7);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 7px 11px;
@@ -2382,6 +2409,87 @@ html.lenis body {
   max-height: 400px;
   border-color: rgb(var(--primary-rgb) / 0.3);
 }
+/* Camada do selo: cobre a seção, não intercepta o ponteiro; só o link real
+   (.cursor-cta) é clicável. */
+.cursor-cta-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.cursor-cta-follow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+.cursor-cta {
+  position: absolute;
+  top: -48px;
+  left: -48px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: var(--text-on-primary);
+  box-shadow:
+    0 0 0 1px rgb(var(--primary-rgb) / 0.4),
+    0 20px 50px -20px var(--glow);
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+.cursor-cta:hover {
+  box-shadow:
+    0 0 0 1px rgb(var(--primary-rgb) / 0.6),
+    0 24px 60px -18px var(--glow);
+}
+/* Fallback estático (toque / sem hover preciso): único botão centralizado. */
+.cta-fallback {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  pointer-events: auto;
+}
+@media (hover: hover) and (pointer: fine) {
+  /* No desktop o selo é a CTA; o botão fica só para teclado/leitores de tela
+     e reaparece ao receber foco. */
+  .cta-fallback {
+    position: absolute;
+    left: 50%;
+    bottom: 32px;
+    margin: 0;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cta-fallback:focus-within {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.cursor-cta-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  text-align: center;
+}
+.cursor-cta-inner svg {
+  margin-top: 2px;
+}
 .cta .eyebrow {
   justify-content: center;
 }
@@ -2400,14 +2508,6 @@ html.lenis body {
   margin-inline: auto;
   font-size: clamp(16px, 1.2vw, 18px);
 }
-.cta-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 40px;
-  flex-wrap: wrap;
-}
-
 /* =========================================================================
    FOOTER
    ========================================================================= */
@@ -2885,6 +2985,9 @@ html.lenis body {
   letter-spacing: -0.02em;
   font-family: var(--font-display, var(--font-display-fallback));
 }
+.case-visit {
+  margin-top: 28px;
+}
 .case-facts {
   display: grid;
   grid-template-columns: 1fr 1fr 2.5fr;
@@ -3059,7 +3162,7 @@ html.lenis body {
   bottom: 12px;
   right: 12px;
   padding: 8px;
-  background: rgba(10, 11, 11, 0.75);
+  background: rgba(15, 24, 42, 0.75);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-strong);
   color: white;
@@ -3082,7 +3185,7 @@ html.lenis body {
   margin: auto;
 }
 .lightbox::backdrop {
-  background: rgba(3, 3, 4, 0.9);
+  background: rgba(6, 11, 22, 0.9);
   backdrop-filter: blur(10px);
 }
 .lightbox-inner {
@@ -3103,7 +3206,7 @@ html.lenis body {
 }
 .lightbox button {
   border: 1px solid var(--border-strong);
-  background: rgba(20, 21, 21, 0.85);
+  background: rgba(22, 34, 58, 0.85);
   color: white;
   width: 44px;
   height: 44px;
@@ -3672,9 +3775,14 @@ body:has(dialog[open]) {
     right: -30%;
     top: 30%;
   }
-  .ticker-track {
-    gap: 36px;
-    animation-duration: 32s;
+  .ticker-row {
+    --ticker-duration: 54s;
+  }
+  .ticker-row.reverse {
+    --ticker-duration: 70s;
+  }
+  .ticker-row {
+    --ticker-gap: 36px;
   }
   .intro {
     padding-block: 52px;
@@ -3806,9 +3914,7 @@ body:has(dialog[open]) {
     border-radius: var(--radius-lg);
     padding: 64px 20px;
   }
-  .cta-actions .magnetic,
-  .cta-actions .magnetic > div,
-  .cta-actions .button {
+  .cta-fallback .button {
     width: 100%;
   }
   .footer-top {
@@ -3980,22 +4086,9 @@ body:has(dialog[open]) {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* Marquee: movimento reduzido a ~1/4 da velocidade, sem salto. */
   .ticker-track {
-    animation: none;
-    width: auto;
-  }
-  .ticker-group {
-    flex-wrap: wrap;
-    gap: 12px 28px;
-  }
-  .ticker-group[aria-hidden="true"] {
-    display: none;
-  }
-  .ticker {
-    mask-image: none;
-    -webkit-mask-image: none;
-  }
-  .cursor-glow {
-    display: none;
+    animation-duration: calc(var(--ticker-duration) * 4) !important;
+    animation-iteration-count: infinite !important;
   }
 }

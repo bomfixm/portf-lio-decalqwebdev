@@ -70,7 +70,7 @@ export default function Home() {
           description="Sistemas, automações e interfaces que resolvem problemas concretos."
         />
       )}
-      {projects.some((p) => p.demo) && (
+      {featured.some((p) => p.demo) && (
         <div className="container">
           <Reveal variant="fade">
             <p className="example-note">

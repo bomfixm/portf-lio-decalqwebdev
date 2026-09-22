@@ -14,6 +14,7 @@ import {
   StaggerItem,
 } from "@/components/Motion";
 import { CTA } from "@/components/Footer";
+import { PrimaryButton } from "@/components/Button";
 
 export const dynamicParams = false;
 
@@ -83,6 +84,13 @@ export default async function CasePage({
           />
           <Reveal variant="up" delay={0.4}>
             <p className="case-lead">{p.shortDescription}</p>
+            {p.liveUrl && (
+              <div className="case-visit">
+                <PrimaryButton href={p.liveUrl} external>
+                  Visitar o site
+                </PrimaryButton>
+              </div>
+            )}
           </Reveal>
           <Reveal variant="up" delay={0.5} className="case-facts">
             <div>

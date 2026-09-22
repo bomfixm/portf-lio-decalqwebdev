@@ -2,11 +2,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { Brand } from "./Header";
-import { PrimaryButton, SecondaryButton } from "./Button";
 import { LineReveal, Reveal } from "./Motion";
 import { BackToTop } from "./BackToTop";
-import { Magnetic } from "./Magnetic";
 import { SpotlightCard } from "./SpotlightCard";
+import { CursorCta } from "./CursorCta";
 
 export function CTA() {
   return (
@@ -41,20 +40,8 @@ export function CTA() {
               resolvido com tecnologia, queremos conhecê-lo.
             </p>
           </Reveal>
-          <Reveal variant="up" delay={0.45}>
-            <div className="cta-actions">
-              <Magnetic>
-                <PrimaryButton href="/contato" large>
-                  Iniciar conversa
-                </PrimaryButton>
-              </Magnetic>
-              <Magnetic strength={0.12}>
-                <SecondaryButton href="/projetos" large>
-                  Ver projetos
-                </SecondaryButton>
-              </Magnetic>
-            </div>
-          </Reveal>
+          {/* CTA única: selo que segue o cursor (desktop) / botão estático (toque) */}
+          <CursorCta href="/contato" label={"Falar\nconosco"} />
         </SpotlightCard>
       </Reveal>
     </section>
