@@ -1,5 +1,6 @@
 "use client";
 import { RotateCcw } from "lucide-react";
+import { Magnetic } from "@/components/Magnetic";
 
 export default function ErrorPage({ reset }: { reset: () => void }) {
   return (
@@ -8,9 +9,11 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
       <span className="eyebrow">Algo saiu do esperado</span>
       <h1>Não conseguimos carregar este conteúdo.</h1>
       <p>Tente novamente para continuar explorando.</p>
-      <button className="button" onClick={reset}>
-        Tentar novamente <RotateCcw size={16} />
-      </button>
+      <Magnetic>
+        <button className="button" onClick={reset}>
+          Tentar novamente <RotateCcw size={16} />
+        </button>
+      </Magnetic>
     </div>
   );
 }

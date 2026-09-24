@@ -8,6 +8,7 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import type { NavigationItem } from "@/types/content";
 import { EASE, useReducedMotion } from "./Motion";
+import { Magnetic } from "./Magnetic";
 
 const links: NavigationItem[] = [
   { label: "Projetos", href: "/projetos" },
@@ -177,13 +178,15 @@ export function Header() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.32, duration: 0.4 }}
             >
-              <Link
-                href="/contato"
-                className="button"
-                onClick={() => setOpen(false)}
-              >
-                Falar conosco <ArrowUpRight size={17} />
-              </Link>
+              <Magnetic>
+                <Link
+                  href="/contato"
+                  className="button"
+                  onClick={() => setOpen(false)}
+                >
+                  Falar conosco <ArrowUpRight size={17} />
+                </Link>
+              </Magnetic>
             </motion.div>
           </motion.nav>
         )}

@@ -8,6 +8,8 @@ import { Footer } from "@/components/Footer";
 import { Background } from "@/components/Background";
 import { CursorGlow } from "@/components/CursorGlow";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { IntroProvider } from "@/components/Intro";
+import { ScrollMemory } from "@/components/ScrollMemory";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -63,12 +65,15 @@ export default function RootLayout({
         <a href="#conteudo" className="skip-link">
           Pular para o conteúdo
         </a>
-        <SmoothScroll />
-        <Background />
-        <CursorGlow />
-        <Header />
-        <main id="conteudo">{children}</main>
-        <Footer />
+        <IntroProvider>
+          <SmoothScroll />
+          <ScrollMemory />
+          <Background />
+          <CursorGlow />
+          <Header />
+          <main id="conteudo">{children}</main>
+          <Footer />
+        </IntroProvider>
       </body>
     </html>
   );

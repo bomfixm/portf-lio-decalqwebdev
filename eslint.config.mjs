@@ -4,5 +4,13 @@ import nextTs from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", "out/**", "next-env.d.ts"]),
+  // public/embed: artefato distribuído para os sites dos clientes (JS clássico,
+  // sem build, com convenções próprias).
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "next-env.d.ts",
+    "public/embed/**",
+    "integracoes/**",
+  ]),
 ]);

@@ -15,8 +15,16 @@ import {
 } from "@/components/Motion";
 import { CTA } from "@/components/Footer";
 import { PrimaryButton } from "@/components/Button";
+import { Magnetic } from "@/components/Magnetic";
 
 export const dynamicParams = false;
+
+/** Marca a origem para o botão "Voltar ao portfólio" do site visitado. */
+function visitUrl(url: string) {
+  const u = new URL(url);
+  u.searchParams.set("from", "decalq");
+  return u.toString();
+}
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -86,9 +94,18 @@ export default async function CasePage({
             <p className="case-lead">{p.shortDescription}</p>
             {p.liveUrl && (
               <div className="case-visit">
-                <PrimaryButton href={p.liveUrl} external>
-                  Visitar o site
-                </PrimaryButton>
+                {p.iframe ? (
+                  // Abre dentro do portfólio, com a barra de retorno.
+                  <PrimaryButton href={`/projetos/${p.slug}/visitar/`}>
+                    Visitar o site
+                  </PrimaryButton>
+                ) : (
+                  // Site bloqueia iframe: abre na mesma aba, marcando a origem
+                  // para o widget "Voltar ao portfólio" instalado nele.
+                  <PrimaryButton href={visitUrl(p.liveUrl)} external sameTab>
+                    Visitar o site
+                  </PrimaryButton>
+                )}
               </div>
             )}
           </Reveal>
@@ -231,16 +248,17 @@ export default async function CasePage({
                   ]
                     .filter(([, url]) => url)
                     .map(([label, url]) => (
-                      <a
-                        className="button secondary"
-                        key={label}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {label}
-                        <ArrowUpRight size={16} />
-                      </a>
+                      <Magnetic key={label} strength={0.12}>
+                        <a
+                          className="button secondary"
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {label}
+                          <ArrowUpRight size={16} />
+                        </a>
+                      </Magnetic>
                     ))}
                 </div>
               )}

@@ -53,11 +53,66 @@ As primitivas em `src/components/Motion.tsx`:
 
 Camadas decorativas: `Background` (luzes, grid e grain fixos; seções com `data-tone` mudam qual luz domina ao entrar no centro da tela), `CursorGlow` (só com mouse), `Ticker` (faixa de capacidades gerada dos dados) e `SpotlightCard` (spotlight e borda em gradiente seguindo o mouse nos cards).
 
-Componentes de experiência: `Button` (`PrimaryButton`/`SecondaryButton`/`TextButton`, com luz que segue o ponteiro via `--mx/--my`), `Magnetic` (hover magnético sutil, só desktop), `CursorCta` (CTA final: selo que segue o cursor no desktop, botão estático único no toque), `RevealImage` (imagem assenta de 1.08 → 1 ao revelar), `HorizontalGallery` (desktop: seção presa e cases atravessando a tela com o scroll; toque/telas menores/reduced motion: carrossel com swipe e snap) e `FeaturedProjects` (case 01 em largura total, 02 invertido).
+A intro da marca (`Intro.tsx`) toca uma vez por aba, só na home: `IntroProvider` decide via `sessionStorage` + cache de módulo e informa ao Hero o atraso da timeline, para intro e Hero serem uma animação só. `ScrollMemory.tsx` guarda a posição do scroll ao sair e a restaura quando o visitante volta pelo histórico (quando o navegador não faz isso sozinho).
+
+Componentes de experiência: `Button` (`PrimaryButton`/`SecondaryButton`/`TextButton`, com luz que segue o ponteiro via `--mx/--my`), `Magnetic` (hover magnético sutil, só desktop — embutido no `Button`, portanto valendo para todos os botões do site), `CursorCta` (CTA final: selo que segue o cursor no desktop, botão estático único no toque), `RevealImage` (imagem assenta de 1.08 → 1 ao revelar), `HorizontalGallery` (desktop: seção presa e cases atravessando a tela com o scroll; toque/telas menores/reduced motion: carrossel com swipe e snap) e `FeaturedProjects` (case 01 em largura total, 02 invertido).
 
 Tipos compartilhados ficam em `src/types/` (`Project`, `Service`, `ProcessStep`, `TechnologyGroup`, `NavigationItem`, `Principle`); os dados usam `satisfies` para manter os literais.
 
 Uma futura variante clara pode substituir esses tokens e `color-scheme`; ainda não há seletor de tema.
+
+## Visitar os sites sem sair do portfólio
+
+`/projetos/<slug>/visitar/` abre o site publicado **dentro** do portfólio: uma
+barra nossa no topo (logo, nome do case, "Voltar ao portfólio" e "Abrir em nova
+aba") e o site num iframe ocupando o resto da tela. O visitante nunca perde o
+caminho de volta e nada precisa ser instalado no site do cliente.
+
+A rota é gerada apenas para os cases com o campo `iframe` preenchido — ou seja,
+os sites que permitem ser embutidos. Quem envia `X-Frame-Options: SAMEORIGIN`
+(hoje: Vai de Smash, APS Engenharia e The One Bistrô) não pode ser exibido em
+iframe por decisão do próprio navegador; nesses cases o botão "Visitar o site"
+abre o site na mesma aba, marcado com `?from=decalq`, e o retorno fica por conta
+do widget da seção seguinte. Para migrá-los para o visualizador, basta remover
+esse cabeçalho na configuração deles na Vercel e preencher `iframe` no case.
+
+O botão suspenso fica no canto inferior esquerdo o tempo todo, com duas ações:
+voltar ao portfólio e abrir o site em nova aba. A barra do topo aparece só na
+entrada (marca, nome do case, domínio) e se recolhe de vez — depois de alguns
+segundos ou assim que o visitante passa a usar o site (o foco vai para o iframe;
+como ele é de outra origem, esse é o único sinal de interação que atravessa a
+fronteira). Recolhida, ela recebe `inert` para sair também da ordem de tabulação.
+
+O botão "Voltar" usa o histórico quando o visitante veio do case (volta à
+posição exata do scroll, ver `ScrollMemory`), e navega para o case quando
+alguém abre o link do visualizador diretamente. `Esc` também fecha.
+O visualizador é renderizado por portal no `<body>`: o template de rota anima um
+`transform`, e um ancestral transformado viraria o bloco de contenção do
+`position: fixed`.
+
+## Botão "Voltar ao portfólio" nos sites dos clientes
+
+Para os sites que **não** podem ser embutidos (ver seção anterior),
+`public/embed/back-to-portfolio.js` é um widget autocontido (sem dependências,
+isolado em Shadow DOM) para instalar nos sites que desenvolvemos. Uma linha
+antes de `</body>`:
+
+```html
+<script defer src="https://SEU-PORTFOLIO/embed/back-to-portfolio.js"
+        data-portfolio="https://SEU-PORTFOLIO"></script>
+```
+
+Também funciona copiado para o `public/` do próprio site do cliente. Opções:
+`data-portfolio`, `data-position` (`left` | `right`), `data-label`,
+`data-always="true"` (mostra mesmo sem vir do portfólio).
+
+Comportamento: só aparece para quem chegou do portfólio (detectado por
+`?from=decalq`, que o botão "Visitar o site" acrescenta, por `document.referrer`
+ou por `sessionStorage`, o que cobre a navegação interna do site visitado).
+O clique usa `history.back()` — o visitante volta à posição exata de onde saiu —
+e cai para `<portfolio>/projetos/` quando não há histórico válido. Some dentro
+de iframes (o preview embutido nos cases). Magnetic e luz do ponteiro apenas em
+`(hover: hover) and (pointer: fine)`; no toque, só um `:active` discreto.
 
 ## Conteúdo
 

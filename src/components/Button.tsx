@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { usePointerVars } from "@/lib/pointer";
+import { Magnetic } from "./Magnetic";
 
 type Variant = "primary" | "secondary" | "text";
 
@@ -15,6 +16,10 @@ interface ButtonProps {
   icon?: boolean;
   className?: string;
   external?: boolean;
+  /** Link externo na mesma aba (permite voltar pelo histórico). */
+  sameTab?: boolean;
+  /** Hover magnético (desktop). Desligue em botões dentro de áreas densas. */
+  magnetic?: boolean;
 }
 
 /**
@@ -30,6 +35,8 @@ export function Button({
   icon = true,
   className = "",
   external = false,
+  sameTab = false,
+  magnetic = true,
 }: ButtonProps) {
   const onPointerMove = usePointerVars<HTMLAnchorElement>();
   const resolved: Variant = variant ?? (secondary ? "secondary" : "primary");
@@ -47,24 +54,27 @@ export function Button({
       {icon && <ArrowUpRight size={large ? 18 : 17} aria-hidden="true" />}
     </>
   );
-  if (external) {
-    return (
-      <a
-        className={classes}
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        onPointerMove={onPointerMove}
-      >
-        {content}
-      </a>
-    );
-  }
-  return (
+  // Na mesma aba mantemos o Referer: é assim que o site do cliente sabe que
+  // o visitante veio do portfólio e pode oferecer o retorno pelo histórico.
+  const button = external ? (
+    <a
+      className={classes}
+      href={href}
+      target={sameTab ? undefined : "_blank"}
+      rel={sameTab ? undefined : "noopener noreferrer"}
+      onPointerMove={onPointerMove}
+    >
+      {content}
+    </a>
+  ) : (
     <Link className={classes} href={href} onPointerMove={onPointerMove}>
       {content}
     </Link>
   );
+
+  // O magnético vale para a linguagem de botão do site; o `text` é um link.
+  if (!magnetic || resolved === "text") return button;
+  return <Magnetic strength={secondary ? 0.12 : 0.18}>{button}</Magnetic>;
 }
 
 export const PrimaryButton = (props: Omit<ButtonProps, "variant">) => (

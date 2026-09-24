@@ -18,16 +18,17 @@ import {
   useMouseTilt,
   useReducedMotion,
 } from "./Motion";
-import { Magnetic } from "./Magnetic";
+import { useIntro } from "./Intro";
 import { projects } from "@/data/projects";
 import { processSteps, services } from "@/data/services";
 import { technologyGroups } from "@/data/technologies";
 
-/* Sequência cinematográfica: cada bloco entra em ordem. */
-const seq = (i: number) => ({
+/* Sequência cinematográfica: cada bloco entra em ordem. `offset` continua a
+   timeline da intro, para não existir corte entre uma e outra. */
+const seq = (i: number, offset = 0) => ({
   duration: 0.9,
   ease: EASE,
-  delay: 0.15 + i * 0.12,
+  delay: offset + 0.15 + i * 0.12,
 });
 
 const stats = [
@@ -42,15 +43,18 @@ const stats = [
 
 export function Hero() {
   const reduced = useReducedMotion();
+  const { ready, delay } = useIntro();
   const initial = reduced ? false : "hidden";
+  // Enquanto não sabemos se a intro vai rodar, o Hero espera.
+  const show = reduced || ready ? "visible" : "hidden";
   return (
     <div className="hero-wrap">
       <motion.div
         className="hero-glow"
         aria-hidden="true"
         initial={reduced ? false : { opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.6, ease: EASE }}
+        animate={ready || reduced ? { opacity: 1, scale: 1 } : undefined}
+        transition={{ duration: 1.6, ease: EASE, delay }}
       />
       <section className="hero container" data-tone="hero">
         <div className="hero-copy">
@@ -61,19 +65,22 @@ export function Hero() {
               visible: { opacity: 1, x: 0 },
             }}
             initial={initial}
-            animate="visible"
-            transition={seq(0)}
+            animate={show}
+            transition={seq(0, delay)}
           >
             Estúdio de tecnologia &amp; desenvolvimento
           </motion.div>
 
           <motion.h1
             initial={initial}
-            animate="visible"
+            animate={show}
             variants={{
               hidden: {},
               visible: {
-                transition: { staggerChildren: 0.11, delayChildren: 0.3 },
+                transition: {
+                  staggerChildren: 0.11,
+                  delayChildren: delay + 0.3,
+                },
               },
             }}
           >
@@ -116,8 +123,8 @@ export function Hero() {
               visible: { opacity: 1, y: 0 },
             }}
             initial={initial}
-            animate="visible"
-            transition={seq(4)}
+            animate={show}
+            transition={seq(4, delay)}
           >
             Desenvolvemos sites, sistemas, automações e ferramentas
             personalizadas que simplificam processos e transformam ideias em
@@ -131,23 +138,19 @@ export function Hero() {
               visible: { opacity: 1, y: 0 },
             }}
             initial={initial}
-            animate="visible"
-            transition={seq(5)}
+            animate={show}
+            transition={seq(5, delay)}
           >
-            <Magnetic>
-              <PrimaryButton href="/projetos">Conhecer projetos</PrimaryButton>
-            </Magnetic>
-            <Magnetic strength={0.12}>
-              <SecondaryButton href="/contato">Falar conosco</SecondaryButton>
-            </Magnetic>
+            <PrimaryButton href="/projetos">Conhecer projetos</PrimaryButton>
+            <SecondaryButton href="/contato">Falar conosco</SecondaryButton>
           </motion.div>
 
           <motion.div
             className="hero-foot"
             variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
             initial={initial}
-            animate="visible"
-            transition={seq(6)}
+            animate={show}
+            transition={seq(6, delay)}
           >
             <div className="hero-stats" aria-label="Resumo do portfólio">
               {stats.map((s) => (
@@ -170,7 +173,7 @@ export function Hero() {
         </div>
 
         <Parallax speed={-0.12} className="hero-art-parallax">
-          <HeroScene />
+          <HeroScene ready={reduced || ready} delay={delay} />
         </Parallax>
       </section>
       <div className="hero-line" aria-hidden="true" />
@@ -178,7 +181,7 @@ export function Hero() {
   );
 }
 
-function HeroScene() {
+function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
   const reduced = useReducedMotion();
   const { ref, rotateX, rotateY } = useMouseTilt(3.5);
   return (
@@ -187,8 +190,8 @@ function HeroScene() {
       aria-label="Composição de interfaces demonstrativas"
       role="img"
       initial={reduced ? false : { opacity: 0, x: 40, scale: 0.96 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      transition={{ duration: 1.3, ease: EASE, delay: 0.5 }}
+      animate={ready ? { opacity: 1, x: 0, scale: 1 } : undefined}
+      transition={{ duration: 1.3, ease: EASE, delay: delay + 0.5 }}
     >
       <motion.div
         ref={ref}
@@ -267,8 +270,8 @@ function HeroScene() {
                     d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22 L430 130 L0 130Z"
                     fill="url(#chart-fill)"
                     initial={reduced ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 2, duration: 1 }}
+                    animate={ready ? { opacity: 1 } : undefined}
+                    transition={{ delay: delay + 2, duration: 1 }}
                   />
                   <motion.path
                     d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22"
@@ -277,8 +280,12 @@ function HeroScene() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     initial={reduced ? false : { pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ delay: 1.1, duration: 1.6, ease: EASE }}
+                    animate={ready ? { pathLength: 1 } : undefined}
+                    transition={{
+                      delay: delay + 1.1,
+                      duration: 1.6,
+                      ease: EASE,
+                    }}
                   />
                 </svg>
               </div>
@@ -300,8 +307,8 @@ function HeroScene() {
         <motion.div
           className="code-window"
           initial={reduced ? false : { opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: EASE, delay: 1 }}
+          animate={ready ? { opacity: 1, y: 0 } : undefined}
+          transition={{ duration: 1, ease: EASE, delay: delay + 1 }}
         >
           <motion.div
             animate={reduced ? undefined : { y: [0, 5, 0] }}
@@ -331,16 +338,16 @@ function HeroScene() {
         <motion.div
           className="float-chip a"
           initial={reduced ? false : { opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: EASE, delay: 1.5 }}
+          animate={ready ? { opacity: 1, scale: 1 } : undefined}
+          transition={{ duration: 0.8, ease: EASE, delay: delay + 1.5 }}
         >
           <Zap size={12} /> Automação ativa
         </motion.div>
         <motion.div
           className="float-chip b"
           initial={reduced ? false : { opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: EASE, delay: 1.7 }}
+          animate={ready ? { opacity: 1, scale: 1 } : undefined}
+          transition={{ duration: 0.8, ease: EASE, delay: delay + 1.7 }}
         >
           <Sparkles size={12} /> Interface responsiva
         </motion.div>

@@ -11,6 +11,7 @@ import {
 } from "@/lib/contact";
 import { siteConfig } from "@/config/site";
 import { usePointerVars } from "@/lib/pointer";
+import { Magnetic } from "./Magnetic";
 const initial: ContactData = {
   name: "",
   company: "",
@@ -171,21 +172,23 @@ export function ContactForm() {
           nesta versão.
         </p>
       )}
-      <button
-        className="button"
-        type="submit"
-        disabled={status === "loading"}
-        onPointerMove={onPointerMove}
-      >
-        <span className="button-label">
-          {status === "loading" ? "Enviando..." : "Enviar mensagem"}
-        </span>
-        {status === "loading" ? (
-          <LoaderCircle className="spin" size={18} />
-        ) : (
-          <ArrowUpRight size={18} />
-        )}
-      </button>
+      <Magnetic>
+        <button
+          className="button"
+          type="submit"
+          disabled={status === "loading"}
+          onPointerMove={onPointerMove}
+        >
+          <span className="button-label">
+            {status === "loading" ? "Enviando..." : "Enviar mensagem"}
+          </span>
+          {status === "loading" ? (
+            <LoaderCircle className="spin" size={18} />
+          ) : (
+            <ArrowUpRight size={18} />
+          )}
+        </button>
+      </Magnetic>
       <div aria-live="polite">
         {(status === "demo" || status === "sent") && (
           <div className="form-feedback">

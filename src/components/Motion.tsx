@@ -23,6 +23,8 @@ import {
  * renderização do cliente usam `fallback`; o valor real entra em seguida
  * via useSyncExternalStore.
  */
+const noopSubscribe = () => () => {};
+
 export function useMediaQuery(query: string, fallback = false): boolean {
   const subscribe = useCallback(
     (cb: () => void) => {
@@ -36,6 +38,15 @@ export function useMediaQuery(query: string, fallback = false): boolean {
     subscribe,
     () => window.matchMedia(query).matches,
     () => fallback,
+  );
+}
+
+/** `true` só depois da hidratação — para portais e APIs de DOM. */
+export function useMounted(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
   );
 }
 

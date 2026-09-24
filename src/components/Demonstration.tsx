@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Play, ArrowUpRight } from "lucide-react";
 import type { Project } from "@/types/project";
+import { Magnetic } from "./Magnetic";
 export function Demonstration({ project: p }: { project: Project }) {
   const hasMedia = p.video || p.gif || p.iframe || p.demoUrl || p.liveUrl;
   return (
@@ -43,14 +44,16 @@ export function Demonstration({ project: p }: { project: Project }) {
           />
         )}
         {(p.demoUrl || p.liveUrl) && (
-          <a
-            className="button secondary"
-            href={p.demoUrl || p.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Abrir demonstração <ArrowUpRight size={16} />
-          </a>
+          <Magnetic strength={0.12}>
+            <a
+              className="button secondary"
+              href={p.demoUrl || p.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir demonstração <ArrowUpRight size={16} />
+            </a>
+          </Magnetic>
         )}
         {!hasMedia && (
           <div className="demo-empty">

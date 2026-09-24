@@ -6,6 +6,7 @@ import { projects } from "@/data/projects";
 import { categories } from "@/types/project";
 import { ProjectCard } from "./ProjectCard";
 import { EASE, Reveal, useReducedMotion } from "./Motion";
+import { Magnetic } from "./Magnetic";
 
 const normalize = (v: string) =>
   v
@@ -100,15 +101,17 @@ export function ProjectCatalog() {
           <Search size={30} />
           <h2>Nenhum projeto por aqui.</h2>
           <p>Tente outro termo ou explore todas as categorias.</p>
-          <button
-            className="button secondary"
-            onClick={() => {
-              setCategory("Todos");
-              setQuery("");
-            }}
-          >
-            Limpar filtros
-          </button>
+          <Magnetic strength={0.12}>
+            <button
+              className="button secondary"
+              onClick={() => {
+                setCategory("Todos");
+                setQuery("");
+              }}
+            >
+              Limpar filtros
+            </button>
+          </Magnetic>
         </motion.div>
       )}
     </>
