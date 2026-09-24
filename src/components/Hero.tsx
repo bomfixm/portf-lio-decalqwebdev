@@ -191,7 +191,7 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
       role="img"
       initial={reduced ? false : { opacity: 0, x: 40, scale: 0.96 }}
       animate={ready ? { opacity: 1, x: 0, scale: 1 } : undefined}
-      transition={{ duration: 1.3, ease: EASE, delay: delay + 0.5 }}
+      transition={{ duration: 0.9, ease: EASE, delay: delay + 0.15 }}
     >
       <motion.div
         ref={ref}
@@ -271,7 +271,7 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
                     fill="url(#chart-fill)"
                     initial={reduced ? false : { opacity: 0 }}
                     animate={ready ? { opacity: 1 } : undefined}
-                    transition={{ delay: delay + 2, duration: 1 }}
+                    transition={{ delay: delay + 0.9, duration: 0.8 }}
                   />
                   <motion.path
                     d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22"
@@ -282,8 +282,8 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
                     initial={reduced ? false : { pathLength: 0 }}
                     animate={ready ? { pathLength: 1 } : undefined}
                     transition={{
-                      delay: delay + 1.1,
-                      duration: 1.6,
+                      delay: delay + 0.5,
+                      duration: 1.2,
                       ease: EASE,
                     }}
                   />
@@ -308,7 +308,7 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
           className="code-window"
           initial={reduced ? false : { opacity: 0, y: 30 }}
           animate={ready ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 1, ease: EASE, delay: delay + 1 }}
+          transition={{ duration: 0.8, ease: EASE, delay: delay + 0.45 }}
         >
           <motion.div
             animate={reduced ? undefined : { y: [0, 5, 0] }}
@@ -339,7 +339,7 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
           className="float-chip a"
           initial={reduced ? false : { opacity: 0, scale: 0.8 }}
           animate={ready ? { opacity: 1, scale: 1 } : undefined}
-          transition={{ duration: 0.8, ease: EASE, delay: delay + 1.5 }}
+          transition={{ duration: 0.6, ease: EASE, delay: delay + 0.7 }}
         >
           <Zap size={12} /> Automação ativa
         </motion.div>
@@ -347,7 +347,7 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
           className="float-chip b"
           initial={reduced ? false : { opacity: 0, scale: 0.8 }}
           animate={ready ? { opacity: 1, scale: 1 } : undefined}
-          transition={{ duration: 0.8, ease: EASE, delay: delay + 1.7 }}
+          transition={{ duration: 0.6, ease: EASE, delay: delay + 0.85 }}
         >
           <Sparkles size={12} /> Interface responsiva
         </motion.div>

@@ -61,6 +61,9 @@ export function IntroProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const decision = useDecision(pathname);
   const [finished, setFinished] = useState(false);
+  // Rede de segurança: nada no hero pode ficar preso invisível esperando a
+  // decisão. Se ela não chegar, liberamos a entrada assim mesmo.
+  const [failsafe, setFailsafe] = useState(false);
   const playing = decision === "play" && !finished;
 
   useEffect(() => {
@@ -87,13 +90,21 @@ export function IntroProvider({ children }: { children: React.ReactNode }) {
     };
   }, [playing]);
 
+  useEffect(() => {
+    if (decision !== "idle") return;
+    const timer = window.setTimeout(() => setFailsafe(true), 1200);
+    return () => window.clearTimeout(timer);
+  }, [decision]);
+
   // O atraso vem da decisão (estável), não do fim da intro: assim a transição
   // do Hero não é reiniciada quando o overlay sai.
   const delay =
     decision === "play" ? (reduced ? CALM.heroDelay : HERO_DELAY) : 0;
 
   return (
-    <IntroContext.Provider value={{ ready: decision !== "idle", delay }}>
+    <IntroContext.Provider
+      value={{ ready: decision !== "idle" || failsafe, delay }}
+    >
       <AnimatePresence>
         {playing && <IntroOverlay reduced={reduced} />}
       </AnimatePresence>
