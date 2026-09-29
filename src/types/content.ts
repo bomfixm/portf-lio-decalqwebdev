@@ -7,6 +7,7 @@ export const serviceIcons = [
   "ChartNoAxesCombined",
   "Braces",
   "Sparkles",
+  "Clapperboard",
 ] as const;
 export type ServiceIcon = (typeof serviceIcons)[number];
 
@@ -16,6 +17,24 @@ export interface Service {
   title: string;
   description: string;
   details: string;
+}
+
+/** Formato demonstrativo exibido na vitrine de social media. */
+export interface SocialFormat {
+  id: string;
+  label: string;
+  ratio: string;
+  description: string;
+}
+
+export interface SocialMediaContent {
+  eyebrow: string;
+  title: string;
+  highlight: string;
+  description: string;
+  formats: SocialFormat[];
+  deliverables: string[];
+  disclaimer: string;
 }
 
 export interface ProcessStep {

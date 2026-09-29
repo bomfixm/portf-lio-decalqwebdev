@@ -1,4 +1,5 @@
 "use client";
+import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowDown,
@@ -185,13 +186,16 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
   const reduced = useReducedMotion();
   const { ref, rotateX, rotateY } = useMouseTilt(3.5);
   return (
-    <motion.div
+    // A entrada é feita por CSS (ver .hero-art em globals.css): assim a cena
+    // nunca depende do JavaScript para ficar visível. O atraso é só uma
+    // variável, para continuar a timeline da intro quando ela existe.
+    <div
       className="hero-art"
       aria-label="Composição de interfaces demonstrativas"
       role="img"
-      initial={reduced ? false : { opacity: 0, x: 40, scale: 0.96 }}
-      animate={ready ? { opacity: 1, x: 0, scale: 1 } : undefined}
-      transition={{ duration: 0.9, ease: EASE, delay: delay + 0.15 }}
+      style={
+        { "--enter-delay": `${ready ? delay + 0.15 : 0.15}s` } as CSSProperties
+      }
     >
       <motion.div
         ref={ref}
@@ -266,26 +270,18 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
                       />
                     </linearGradient>
                   </defs>
-                  <motion.path
+                  <path
+                    className="chart-fill"
                     d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22 L430 130 L0 130Z"
                     fill="url(#chart-fill)"
-                    initial={reduced ? false : { opacity: 0 }}
-                    animate={ready ? { opacity: 1 } : undefined}
-                    transition={{ delay: delay + 0.9, duration: 0.8 }}
                   />
-                  <motion.path
+                  <path
+                    className="chart-line"
                     d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22"
                     fill="none"
                     stroke="var(--primary)"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    initial={reduced ? false : { pathLength: 0 }}
-                    animate={ready ? { pathLength: 1 } : undefined}
-                    transition={{
-                      delay: delay + 0.5,
-                      duration: 1.2,
-                      ease: EASE,
-                    }}
                   />
                 </svg>
               </div>
@@ -304,12 +300,7 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
           </div>
         </motion.div>
 
-        <motion.div
-          className="code-window"
-          initial={reduced ? false : { opacity: 0, y: 30 }}
-          animate={ready ? { opacity: 1, y: 0 } : undefined}
-          transition={{ duration: 0.8, ease: EASE, delay: delay + 0.45 }}
-        >
+        <div className="code-window">
           <motion.div
             animate={reduced ? undefined : { y: [0, 5, 0] }}
             transition={{
@@ -333,30 +324,20 @@ function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
               <Check size={13} /> Menos tarefas. Mais possibilidades.
             </div>
           </motion.div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="float-chip a"
-          initial={reduced ? false : { opacity: 0, scale: 0.8 }}
-          animate={ready ? { opacity: 1, scale: 1 } : undefined}
-          transition={{ duration: 0.6, ease: EASE, delay: delay + 0.7 }}
-        >
+        <div className="float-chip a">
           <Zap size={12} /> Automação ativa
-        </motion.div>
-        <motion.div
-          className="float-chip b"
-          initial={reduced ? false : { opacity: 0, scale: 0.8 }}
-          animate={ready ? { opacity: 1, scale: 1 } : undefined}
-          transition={{ duration: 0.6, ease: EASE, delay: delay + 0.85 }}
-        >
+        </div>
+        <div className="float-chip b">
           <Sparkles size={12} /> Interface responsiva
-        </motion.div>
+        </div>
 
         <div className="art-bottom">
           <span>Design + código + propósito</span>
           <span>↓</span>
         </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

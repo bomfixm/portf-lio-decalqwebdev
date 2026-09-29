@@ -4,6 +4,7 @@ export const projectTypes = [
   "Sistema Web",
   "Automação",
   "Dashboard",
+  "Social Media",
   "Aplicativo",
   "IA",
   "Outro",

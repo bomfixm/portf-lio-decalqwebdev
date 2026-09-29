@@ -693,10 +693,27 @@ html.lenis body {
 .header.scrolled .header-inner {
   height: var(--header-h-scrolled);
 }
+/* A marca reúne três alvos irmãos: o símbolo (pisca), o texto (leva para a
+   home) e, por cima do cursor desenhado, o botão de trocar a cor. */
 .brand {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 12px;
+}
+.brand-face {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.brand-face:focus-visible {
+  outline: 2px solid rgb(var(--primary-rgb) / 0.9);
+  outline-offset: 3px;
+}
+.brand-link {
   font-family: var(--font-display, var(--font-display-fallback));
   font-size: 13px;
   letter-spacing: 0.06em;
@@ -707,28 +724,124 @@ html.lenis body {
 .brand-logo {
   height: 36px;
   width: auto;
-  filter: drop-shadow(0 0 14px rgb(var(--primary-rgb) / 0.35));
-  transition: transform var(--dur-slow) var(--ease-out);
+  filter: drop-shadow(0 0 14px var(--decalq-glow, rgb(var(--primary-rgb) / 0.35)));
+  transition:
+    transform var(--dur-slow) var(--ease-out),
+    filter var(--dur-slow) var(--ease-out);
 }
 .brand:hover .brand-logo {
   transform: translateY(-1px) rotate(-3deg);
 }
-.brand-mark {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: rgb(var(--primary-rgb) / 0.1);
-  border: 1px solid rgb(var(--primary-rgb) / 0.25);
-  color: var(--primary);
-  font-size: 20px;
-  line-height: 1;
-  box-shadow: 0 0 24px -8px var(--glow);
-  transition: transform var(--dur-slow) var(--ease-out);
+
+/* --- o decalqzinho -------------------------------------------------------
+   A cor vem de duas paradas de gradiente; trocar a classe .alt troca a
+   paleta inteira do símbolo sem tocar no texto "WEB DECALQ". */
+.decalq-stop-a {
+  stop-color: var(--decalq-a, #8cbaff);
 }
-.brand:hover .brand-mark {
-  transform: rotate(90deg);
+.decalq-stop-b {
+  stop-color: var(--decalq-b, #5697f8);
+}
+.decalq.alt {
+  --decalq-a: #a5e9e5;
+  --decalq-b: #55c3be;
+  --decalq-glow: rgb(127 216 212 / 0.4);
+}
+.decalq-olho,
+.decalq-cursor,
+.decalq-tracos {
+  transform-box: fill-box;
+}
+.decalq-olho {
+  transform-origin: 50% 92%;
+}
+.decalq-cursor {
+  transform-origin: 18% 8%;
+}
+.decalq-tracos {
+  transform-origin: 20% 90%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .decalq-stop-a,
+  .decalq-stop-b {
+    transition: stop-color var(--dur-slow) var(--ease-out);
+  }
+  .decalq-olhos.piscar .decalq-olho {
+    animation: decalq-piscar 0.42s var(--ease-out);
+  }
+  .decalq-cursor.clicou {
+    animation: decalq-clique 0.26s var(--ease-out);
+  }
+  .decalq-cursor.clicou .decalq-tracos {
+    animation: decalq-tracos 0.26s var(--ease-out);
+  }
+}
+.decalq-olhos .decalq-olho.piscadinha {
+  animation: decalq-piscadinha 0.38s var(--ease-out);
+}
+@keyframes decalq-piscadinha {
+  0% {
+    transform: scaleY(1);
+  }
+  30% {
+    transform: scaleY(0.13);
+  }
+  52% {
+    transform: scaleY(0.13);
+  }
+  80% {
+    transform: scaleY(1.08);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes decalq-piscar {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.12);
+  }
+  72% {
+    transform: scaleY(1.08);
+  }
+}
+@keyframes decalq-clique {
+  40% {
+    transform: translate(3px, 3px) scale(0.96);
+  }
+}
+@keyframes decalq-tracos {
+  40% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Alvo do cursor desenhado: fica sobre ele e avança para a folga entre o
+   símbolo e o texto — nunca sobre as letras, que continuam levando à home. */
+.brand-toggle {
+  position: absolute;
+  left: 31px;
+  top: 73%;
+  width: 29px;
+  height: 30px;
+  transform: translateY(-50%);
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.brand-toggle:focus-visible {
+  outline: 2px solid rgb(var(--primary-rgb) / 0.9);
+  outline-offset: 2px;
+}
+.brand:has(.brand-toggle:hover) .decalq-cursor,
+.brand:has(.brand-toggle:focus-visible) .decalq-cursor {
+  filter: brightness(1.15);
 }
 .desktop-nav {
   display: flex;
@@ -960,12 +1073,84 @@ html.lenis body {
   }
 }
 
-/* Hero scene (composição de interfaces) */
+/* Hero scene (composição de interfaces).
+   A entrada é CSS: o estado padrão é visível, então a cena aparece mesmo se o
+   JavaScript falhar. `--enter-delay` só continua a timeline da intro. */
 .hero-art {
   position: relative;
   height: 520px;
   perspective: 1400px;
   transform-style: preserve-3d;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-art {
+    animation: scene-in 0.9s var(--ease-out) both;
+    animation-delay: var(--enter-delay, 0.15s);
+  }
+  .hero-art .code-window {
+    animation: scene-rise 0.8s var(--ease-out) both;
+    animation-delay: calc(var(--enter-delay, 0.15s) + 0.3s);
+  }
+  .hero-art .float-chip {
+    animation: scene-pop 0.6s var(--ease-out) both;
+    animation-delay: calc(var(--enter-delay, 0.15s) + 0.55s);
+  }
+  .hero-art .float-chip.b {
+    animation-delay: calc(var(--enter-delay, 0.15s) + 0.7s);
+  }
+  .hero-art .chart-line {
+    stroke-dasharray: 520;
+    animation: chart-draw 1.2s var(--ease-out) both;
+    animation-delay: calc(var(--enter-delay, 0.15s) + 0.35s);
+  }
+  .hero-art .chart-fill {
+    animation: scene-fade 0.8s var(--ease-out) both;
+    animation-delay: calc(var(--enter-delay, 0.15s) + 0.75s);
+  }
+}
+@keyframes scene-in {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes scene-rise {
+  from {
+    opacity: 0;
+    transform: rotate(2.5deg) translateZ(60px) translateY(30px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scene-pop {
+  from {
+    opacity: 0;
+    transform: translateZ(90px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scene-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes chart-draw {
+  from {
+    stroke-dashoffset: 520;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 .hero-art-inner {
   position: absolute;
@@ -2962,55 +3147,92 @@ html.lenis body {
 /* =========================================================================
    INTRO — assinatura da marca antes do Hero
    ========================================================================= */
+/* Cortina pintada ANTES da hidratação (ver o script em layout.tsx): sem ela o
+   Hero apareceria por alguns frames antes de a intro montar. O próprio script
+   devolve a página em 5s caso o React nunca chegue a montar. */
+html[data-intro="play"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: var(--gradient-background);
+}
+html[data-intro="play"] body {
+  overflow: hidden;
+}
+
 .brand-intro {
   position: fixed;
   inset: 0;
   z-index: 200;
-  pointer-events: none; /* decorativa: nunca bloqueia cliques */
   display: grid;
   place-items: center;
+  overflow: hidden; /* o símbolo entra de fora da tela: nada de rolagem lateral */
   background:
     radial-gradient(
-      60% 60% at 50% 50%,
-      rgb(var(--primary-rgb) / 0.06),
+      60% 60% at 50% 45%,
+      rgb(var(--primary-rgb) / 0.07),
       transparent 70%
     ),
     var(--gradient-background);
-  will-change: opacity;
+  will-change: clip-path;
 }
-.brand-intro-logo {
+.brand-intro-stage {
   position: relative;
   z-index: 1;
-  display: block;
-  width: min(280px, 56vw);
-  overflow: hidden;
-  will-change: transform, filter, opacity;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
 }
-.brand-intro-logo img {
+/* O decalqzinho começa inteiro fora da tela, à esquerda: metade da viewport
+   mais 60% da própria largura garante isso em qualquer tamanho, sem medir
+   nada em JavaScript. A inclinação some ao chegar. */
+.brand-intro-logo {
   display: block;
-  width: 100%;
+  width: min(240px, 52vw);
   height: auto;
+  animation: decalq-entra 0.9s var(--ease-out);
 }
-/* luz atravessando a logo, recortada pela própria silhueta */
-.brand-intro-sweep {
-  position: absolute;
-  inset: -10% -30%;
-  pointer-events: none;
+@keyframes decalq-entra {
+  from {
+    transform: translateX(calc(-50vw - 60%)) rotate(-6deg);
+  }
+  to {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
+/* a frase sobe de dentro de uma máscara, como as headlines do site */
+.brand-intro-line {
+  display: block;
+  overflow: hidden;
+  max-width: min(440px, 80vw);
+  padding-bottom: 0.25em;
+  margin-bottom: -0.25em;
+}
+.brand-intro-line > span {
+  display: block;
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: 11px;
+  line-height: 1.8;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+.brand-intro-rule {
+  display: block;
+  width: min(200px, 46vw);
+  height: 1px;
+  transform-origin: center;
   background: linear-gradient(
-    105deg,
-    transparent 38%,
-    rgba(255, 255, 255, 0.85) 50%,
-    transparent 62%
+    90deg,
+    transparent,
+    rgb(var(--primary-rgb) / 0.55),
+    transparent
   );
-  mask-image: url("/brand/logo.png");
-  -webkit-mask-image: url("/brand/logo.png");
-  mask-size: 76.9% 100%;
-  -webkit-mask-size: 76.9% 100%;
-  mask-position: center;
-  -webkit-mask-position: center;
-  mask-repeat: no-repeat;
-  -webkit-mask-repeat: no-repeat;
-  will-change: transform;
 }
 .brand-intro-glow {
   position: absolute;
@@ -3025,12 +3247,55 @@ html.lenis body {
   filter: blur(50px);
   pointer-events: none;
 }
+.brand-intro-skip {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+.brand-intro-skip:hover {
+  color: var(--text-primary);
+  border-color: rgb(var(--primary-rgb) / 0.5);
+}
+.brand-intro-skip:focus-visible {
+  outline: 2px solid rgb(var(--primary-rgb) / 0.8);
+  outline-offset: 3px;
+  color: var(--text-primary);
+}
 @media (max-width: 767px) {
   .brand-intro-logo {
-    width: min(220px, 62vw);
+    width: min(190px, 58vw);
   }
   .brand-intro-glow {
     filter: blur(34px);
+  }
+  .brand-intro-line > span {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+  /* alvo de toque confortável e fora da área do polegar do sistema */
+  .brand-intro-skip {
+    right: 50%;
+    bottom: 34px;
+    transform: translateX(50%);
+    min-height: 44px;
+    padding: 12px 20px;
   }
 }
 
@@ -3966,6 +4231,331 @@ body:has(dialog[open]) {
 }
 
 /* =========================================================================
+   SOCIAL MEDIA
+   ========================================================================= */
+/* Decoração do card no bento: três formatos verticais empilhados. */
+.deco-social {
+  right: 26px;
+  bottom: 26px;
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+}
+.deco-social .quadro {
+  display: block;
+  width: 28px;
+  border-radius: 7px;
+  border: 1px solid rgb(var(--primary-rgb) / 0.4);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--primary-rgb) / 0.2),
+    transparent 75%
+  );
+}
+.deco-social .a {
+  height: 48px;
+}
+.deco-social .b {
+  height: 68px;
+  border-color: rgb(var(--primary-rgb) / 0.62);
+}
+.deco-social .c {
+  height: 40px;
+}
+
+/* A vitrine continua a seção de serviços: mesma coluna, sem número próprio. */
+.social {
+  margin-top: 72px;
+}
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 56px;
+  align-items: center;
+}
+.social-grid > * {
+  min-width: 0;
+}
+.social-copy h2 {
+  font-size: clamp(30px, 3.4vw, 46px);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  margin: 18px 0 20px;
+}
+.social-copy > div > p {
+  max-width: 46ch;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+.social-list {
+  list-style: none;
+  margin: 28px 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.social-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+.social-list svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--primary);
+}
+
+/* Peças demonstrativas: composições abstratas, sem conteúdo de cliente. */
+.social-pieces {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  max-width: 100%;
+}
+.peca {
+  position: relative;
+  flex: none;
+  margin: 0;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, #182842, #101c33);
+  box-shadow:
+    0 30px 70px -34px rgba(0, 0, 0, 0.9),
+    0 0 60px -40px var(--glow);
+  overflow: hidden;
+}
+.peca.vertical {
+  width: 170px;
+  aspect-ratio: 9 / 16;
+  z-index: 2;
+  transform: rotate(-2deg);
+}
+.peca.carrossel {
+  width: 152px;
+  aspect-ratio: 4 / 5;
+  transform: rotate(1.5deg) translateY(20px);
+}
+.peca.post {
+  width: 134px;
+  aspect-ratio: 1;
+  transform: rotate(3deg) translateY(-14px);
+}
+.peca-ratio {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+}
+.peca-topo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.peca-topo img {
+  width: 26px;
+  height: auto;
+}
+.peca-topo i {
+  display: block;
+  width: 38px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.peca-play {
+  margin: auto;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--primary-light);
+  background: rgb(var(--primary-rgb) / 0.18);
+  border: 1px solid rgb(var(--primary-rgb) / 0.5);
+}
+.peca-legenda {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.peca-legenda i {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.peca-legenda i:first-child {
+  width: 82%;
+}
+.peca-legenda i:last-child {
+  width: 54%;
+}
+.peca-progresso {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.peca-progresso i {
+  display: block;
+  height: 100%;
+  width: 46%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+.peca-paginas {
+  position: relative;
+  flex: 1;
+  margin: 8px 0 12px;
+}
+.peca-paginas i {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    160deg,
+    rgb(var(--primary-rgb) / 0.18),
+    transparent 72%
+  );
+}
+.peca-paginas i:nth-child(1) {
+  transform: translate(9px, -7px) scale(0.93);
+  opacity: 0.4;
+}
+.peca-paginas i:nth-child(2) {
+  transform: translate(4px, -3px) scale(0.97);
+  opacity: 0.7;
+}
+.peca-pontos {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+.peca-pontos i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+.peca-pontos i.on {
+  background: var(--primary);
+}
+.peca-marca {
+  margin: auto auto 12px;
+}
+.peca-marca img {
+  width: 40px;
+  height: auto;
+}
+.peca-texto {
+  display: grid;
+  gap: 5px;
+}
+.peca-texto i {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.peca-texto i:last-child {
+  width: 62%;
+}
+/* O estado parado já é o estado final: o movimento é só um acabamento. */
+@media (prefers-reduced-motion: no-preference) {
+  .peca {
+    animation: peca-flutua 7s ease-in-out infinite alternate;
+  }
+  .peca.carrossel {
+    animation-delay: -2.4s;
+  }
+  .peca.post {
+    animation-delay: -4.2s;
+  }
+  .peca-progresso i {
+    animation: peca-scrub 5s var(--ease-out) infinite alternate;
+  }
+}
+@keyframes peca-flutua {
+  from {
+    translate: 0 4px;
+  }
+  to {
+    translate: 0 -8px;
+  }
+}
+@keyframes peca-scrub {
+  from {
+    width: 24%;
+  }
+  to {
+    width: 88%;
+  }
+}
+
+.social-formats {
+  list-style: none;
+  margin: 56px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.social-format {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+.social-format-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.social-format strong {
+  font-family: var(--font-display, var(--font-display-fallback));
+  font-size: 15px;
+  font-weight: 500;
+}
+.social-format-ratio {
+  flex: none;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgb(var(--primary-rgb) / 0.12);
+  color: var(--primary-light);
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.social-format p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+.social-note {
+  margin: 26px auto 0;
+  max-width: 62ch;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text-tertiary);
+}
+
+/* =========================================================================
    RESPONSIVE
    ========================================================================= */
 @media (min-width: 1600px) {
@@ -4097,8 +4687,13 @@ body:has(dialog[open]) {
   .menu-toggle {
     display: grid;
   }
-  .brand {
+  .brand-link {
     font-size: 12px;
+  }
+  /* toque: alvo mais alto, ainda dentro da folga antes do texto */
+  .brand-toggle {
+    height: 44px;
+    border-radius: 12px;
   }
   .section-heading {
     align-items: start;
@@ -4495,5 +5090,63 @@ body:has(dialog[open]) {
   .ticker-track {
     animation-duration: calc(var(--ticker-duration) * 4) !important;
     animation-iteration-count: infinite !important;
+  }
+  /* Piscadinha da logo: exceção consciente ao corte acima. Ela não aparece
+     sozinha — é a resposta a um clique num controle que existe só para isso,
+     e some se o corte a engolir. O movimento involuntário (piscada no hover,
+     empurrão do cursor) continua desligado. */
+  .decalq-olho.piscadinha {
+    animation-duration: 0.38s !important;
+  }
+}
+
+/* Social media — ajustes por largura (fecham a seção RESPONSIVE acima). */
+@media (max-width: 1100px) {
+  .social-grid {
+    gap: 40px;
+  }
+  .social-formats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 900px) {
+  .social {
+    margin-top: 56px;
+  }
+  .social-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .social-copy > div > p {
+    max-width: none;
+  }
+}
+@media (max-width: 767px) {
+  .social-pieces {
+    gap: 12px;
+  }
+  .peca.vertical {
+    width: 34%;
+  }
+  .peca.carrossel {
+    width: 30%;
+  }
+  .peca.post {
+    width: 26%;
+    padding: 11px;
+  }
+  .peca-topo img {
+    width: 20px;
+  }
+  .peca-play {
+    width: 34px;
+    height: 34px;
+  }
+  .social-formats {
+    grid-template-columns: 1fr;
+    margin-top: 40px;
+  }
+  .social-format {
+    padding: 20px;
   }
 }

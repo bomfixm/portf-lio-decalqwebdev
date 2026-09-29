@@ -7,6 +7,7 @@ import {
   ChartNoAxesCombined,
   Braces,
   Sparkles,
+  Clapperboard,
   Code2,
   Database,
   Terminal,
@@ -24,6 +25,7 @@ const icons = {
   ChartNoAxesCombined,
   Braces,
   Sparkles,
+  Clapperboard,
 };
 
 export function SectionTitle({
@@ -57,9 +59,11 @@ export function SectionTitle({
   );
 }
 
-/* Layout do bento: web ocupa 2x2, automação/api/ia ocupam 2 colunas. */
+/* Layout do bento em 4 colunas: web e social abrem a grade com 2x2 cada,
+   automação/api/ia ocupam 2 colunas e custom/data fecham as linhas. */
 const bentoSize: Record<string, string> = {
   web: "span-2 tall",
+  social: "span-2 tall",
   automation: "span-2",
   custom: "",
   data: "",
@@ -68,6 +72,7 @@ const bentoSize: Record<string, string> = {
 };
 const contactType: Record<string, string> = {
   web: "Site",
+  social: "Social Media",
   automation: "Automação",
   custom: "Sistema Web",
   data: "Dashboard",
@@ -88,6 +93,14 @@ function BentoDeco({ id }: { id: string }) {
           </div>
           <div className="bento-deco deco-window" aria-hidden="true" />
         </>
+      );
+    case "social":
+      return (
+        <div className="bento-deco deco-social" aria-hidden="true">
+          <i className="quadro a" />
+          <i className="quadro b" />
+          <i className="quadro c" />
+        </div>
       );
     case "automation":
       return (

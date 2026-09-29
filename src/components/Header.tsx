@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,6 +8,7 @@ import { siteConfig } from "@/config/site";
 import type { NavigationItem } from "@/types/content";
 import { EASE, useReducedMotion } from "./Motion";
 import { Magnetic } from "./Magnetic";
+import { BrandSymbol } from "./BrandSymbol";
 
 const links: NavigationItem[] = [
   { label: "Projetos", href: "/projetos" },
@@ -18,25 +18,60 @@ const links: NavigationItem[] = [
   { label: "Contato", href: "/contato" },
 ];
 
+/**
+ * A marca tem três alvos distintos, todos irmãos (nada de botão dentro de
+ * link): o símbolo inteiro pisca, o texto leva para a home e o cursor
+ * desenhado troca a cor — e também pisca.
+ */
 export function Brand() {
+  const [alt, setAlt] = useState(false);
+  const [clicando, setClicando] = useState(false);
+  const [piscadinha, setPiscadinha] = useState(0);
+  const reduced = useReducedMotion();
+
+  const piscar = () => setPiscadinha((n) => n + 1);
+
+  const alternarCor = () => {
+    setAlt((v) => !v);
+    piscar();
+    if (!reduced) setClicando(true);
+  };
+
   return (
-    <Link href="/" className="brand" aria-label={`${siteConfig.name}, início`}>
-      {siteConfig.logo ? (
-        <Image
-          src={siteConfig.logo}
-          alt=""
-          width={54}
-          height={36}
+    <div className="brand">
+      <button
+        type="button"
+        className="brand-face"
+        onClick={piscar}
+        aria-label={`Fazer o símbolo da ${siteConfig.name} piscar`}
+      >
+        <BrandSymbol
           className="brand-logo"
-          priority
+          alt={alt}
+          clicking={clicando}
+          onClickingEnd={() => setClicando(false)}
+          wink={piscadinha}
         />
-      ) : (
-        <span className="brand-mark" aria-hidden="true">
-          ✳
-        </span>
-      )}
-      <span>{siteConfig.name}</span>
-    </Link>
+      </button>
+      <Link
+        href="/"
+        className="brand-link"
+        aria-label={`${siteConfig.name}, início`}
+      >
+        {siteConfig.name}
+      </Link>
+      <button
+        type="button"
+        className="brand-toggle"
+        onClick={alternarCor}
+        aria-pressed={alt}
+        aria-label={
+          alt
+            ? "Cor do símbolo: verde-água. Voltar para o azul"
+            : "Cor do símbolo: azul. Mudar para verde-água"
+        }
+      />
+    </div>
   );
 }
 

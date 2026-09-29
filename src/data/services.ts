@@ -1,4 +1,8 @@
-import type { ProcessStep, Service } from "@/types/content";
+import type {
+  ProcessStep,
+  Service,
+  SocialMediaContent,
+} from "@/types/content";
 
 export const services = [
   {
@@ -9,6 +13,15 @@ export const services = [
       "Sites, sistemas e plataformas que conectam sua marca às pessoas.",
     details:
       "Da arquitetura da informação à interface final, criamos experiências responsivas, acessíveis e fáceis de manter.",
+  },
+  {
+    id: "social",
+    icon: "Clapperboard",
+    title: "Social Media",
+    description:
+      "Vídeos e posts com a mesma identidade que sua marca tem no site.",
+    details:
+      "Edição de vídeos curtos, criação de posts e carrosséis e adaptação de formatos para cada rede, mantendo consistência visual entre as peças.",
   },
   {
     id: "automation",
@@ -54,6 +67,46 @@ export const services = [
       "Avaliamos onde a IA pode ajudar e criamos fluxos com revisão humana, limites claros e proteção das informações.",
   },
 ] as const satisfies readonly Service[];
+
+/** Conteúdo editável da vitrine de social media. */
+export const socialMedia: SocialMediaContent = {
+  eyebrow: "Social media",
+  title: "Sua marca também precisa funcionar bem",
+  highlight: "fora do site.",
+  description:
+    "A mesma atenção que colocamos em uma interface vale para o feed: formato certo para cada rede, ritmo de edição e peças que continuam parecendo da mesma marca.",
+  formats: [
+    {
+      id: "reels",
+      label: "Reels, TikTok e Shorts",
+      ratio: "9:16",
+      description:
+        "Edição de vídeos curtos: cortes, legendas, ritmo e finalização prontos para publicar.",
+    },
+    {
+      id: "carrossel",
+      label: "Carrossel",
+      ratio: "4:5",
+      description:
+        "Sequências que explicam uma ideia por partes, com hierarquia clara do primeiro ao último quadro.",
+    },
+    {
+      id: "post",
+      label: "Post único",
+      ratio: "1:1",
+      description:
+        "Peças diretas para avisos, lançamentos e comunicação institucional.",
+    },
+  ],
+  deliverables: [
+    "Edição de vídeos curtos para Reels, TikTok e Shorts",
+    "Criação de posts e carrosséis",
+    "Adaptação de conteúdo e formatos para cada rede",
+    "Identidade visual e consistência entre as peças",
+  ],
+  disclaimer:
+    "Peças conceituais, criadas para demonstrar formatos e acabamento. Não representam clientes, campanhas ou resultados reais.",
+};
 
 export const processSteps = [
   {
