@@ -8,22 +8,28 @@ import {
   useEffect,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import { siteConfig } from "@/config/site";
-import { EASE } from "./Motion";
+import { EASE, useMounted, useReducedMotion } from "./Motion";
 import { BrandSymbol } from "./BrandSymbol";
 
-/* Assinatura da marca antes do Hero: o decalqzinho entra deslizando de fora
-   da tela, para no centro, dá a MESMA piscadinha do clique na logo (o mesmo
-   componente e a mesma animação de olho) e some enquanto a cortina revela o
-   site. Uma timeline só — HERO_DELAY começa antes de HOLD terminar. */
-const KEY = "decalq:intro";
+/* Abertura da home: o decalqzinho entra deslizando de fora da tela, para no
+   centro, dá a MESMA piscadinha do clique na logo (o mesmo componente e a
+   mesma animação de olho) e some enquanto a cortina revela o site.
+   Uma timeline só — HERO_DELAY começa antes de HOLD terminar.
+
+   Ela toca SEMPRE que a home entra em cena: abertura direta, F5 ou volta por
+   navegação interna. Não existe memória de sessão, de visita ou de navegador. */
 const WINK_AT = 1.25; // piscadinha, logo depois de parar no centro
 const HOLD = 1.95; // quando a cortina começa a sair
 const HERO_DELAY = 1.85; // Hero entra antes de a intro terminar
 const EXIT = 0.75; // duração da saída
 const EXIT_SKIP = 0.4; // saída quando o visitante pula
+
+/* Versão para quem pede menos movimento: o personagem aparece já no centro
+   (o deslize é cortado pelo CSS), pisca e sai num fade — sem travessia de
+   tela e sem cortina. Aparece do mesmo jeito; o que muda é o movimento. */
+const CALMO = { wink: 0.45, hold: 1.2, heroDelay: 1.05, exit: 0.45 };
 
 type IntroState = { ready: boolean; delay: number };
 const IntroContext = createContext<IntroState>({ ready: true, delay: 0 });
@@ -31,90 +37,70 @@ const IntroContext = createContext<IntroState>({ ready: true, delay: 0 });
 /** Atraso que o Hero deve aplicar para continuar a timeline da intro. */
 export const useIntro = () => useContext(IntroContext);
 
-/**
- * Decide, uma única vez por aba, se a intro deve tocar. O valor fica em cache
- * no módulo: voltar de um projeto ou navegar entre rotas não repete a intro.
- * "idle" é o valor de servidor/hidratação — nada anima até a decisão chegar,
- * e por isso não existe divergência de hidratação.
- *
- * A preferência por menos movimento é lida aqui, junto com a decisão, para que
- * o overlay nunca chegue a montar nesse caso (nada de piscar e sumir).
- */
-type Decision = "idle" | "play" | "skip";
-let cached: Exclude<Decision, "idle"> | null = null;
-const noopSubscribe = () => () => {};
-
-function useDecision(pathname: string): Decision {
-  return useSyncExternalStore<Decision>(
-    noopSubscribe,
-    () => {
-      if (pathname !== "/") return "skip";
-      if (cached === null) {
-        const calmo = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches;
-        try {
-          cached =
-            calmo || sessionStorage.getItem(KEY) === "1" ? "skip" : "play";
-        } catch {
-          cached = calmo ? "skip" : "play"; // sessionStorage bloqueado
-        }
-      }
-      return cached;
-    },
-    () => "idle",
-  );
-}
-
 export function IntroProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const decision = useDecision(pathname);
-  const [finished, setFinished] = useState(false);
-  // Rede de segurança: nada no hero pode ficar preso invisível esperando a
-  // decisão. Se ela não chegar, liberamos a entrada assim mesmo.
-  const [failsafe, setFailsafe] = useState(false);
-  // Quando o visitante pula antes de o Hero começar, ele entra na hora.
+  const reduced = useReducedMotion();
+  // No servidor e na hidratação nada toca: o overlay é só do cliente, e o
+  // fundo antes da hidratação vem do CSS (script anti-flash em layout.tsx).
+  const montado = useMounted();
+  const tempos = reduced
+    ? { hold: CALMO.hold, heroDelay: CALMO.heroDelay }
+    : { hold: HOLD, heroDelay: HERO_DELAY };
+
+  const [tocando, setTocando] = useState(false);
   const [pulou, setPulou] = useState(false);
+  // `rodada` identifica cada exibição: como vira a key do overlay, voltar
+  // para a home remonta tudo e a sequência recomeça do zero.
+  const [rodada, setRodada] = useState(0);
+  const [visto, setVisto] = useState<string | null>(null);
   const inicio = useRef(0);
-  const playing = decision === "play" && !finished;
+
+  /* Toda entrada na home abre uma exibição nova; sair dela fecha a que
+     estiver em cena. Ajuste de estado durante a renderização — é o padrão
+     do React para reagir a uma prop/rota que mudou, sem efeito no meio. */
+  const rota = montado ? pathname : null;
+  if (rota !== visto) {
+    setVisto(rota);
+    setTocando(rota === "/");
+    setPulou(false);
+    if (rota === "/") setRodada((n) => n + 1);
+  }
 
   const encerrar = useCallback(() => {
     if (
       inicio.current &&
-      performance.now() - inicio.current < HERO_DELAY * 1000
+      performance.now() - inicio.current < tempos.heroDelay * 1000
     )
       setPulou(true);
-    setFinished(true);
-  }, []);
+    setTocando(false);
+  }, [tempos.heroDelay]);
 
   useEffect(() => {
-    if (decision !== "play") return;
-    try {
-      sessionStorage.setItem(KEY, "1");
-    } catch {
-      /* sem sessionStorage: a decisão já está em cache no módulo */
-    }
+    if (!tocando) return;
     window.scrollTo(0, 0);
     inicio.current = performance.now();
-    const timer = window.setTimeout(() => setFinished(true), HOLD * 1000);
+    const timer = window.setTimeout(
+      () => setTocando(false),
+      tempos.hold * 1000,
+    );
     return () => window.clearTimeout(timer);
-  }, [decision]);
+  }, [tocando, rodada, tempos.hold]);
 
   // Trava o scroll apenas enquanto a intro está na tela e devolve a página
   // assim que ela sai — inclusive para o CSS que segura a rolagem antes da
   // hidratação (ver o script anti-flash em layout.tsx).
   useEffect(() => {
-    document.documentElement.dataset.intro = playing ? "play" : "done";
-    if (!playing) return;
+    document.documentElement.dataset.intro = tocando ? "play" : "done";
+    if (!tocando) return;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [playing]);
+  }, [tocando]);
 
   // Clicar, tocar ou tentar rolar encerra a intro suavemente.
   useEffect(() => {
-    if (!playing) return;
+    if (!tocando) return;
     const porTecla = (e: KeyboardEvent) => {
       if (e.key === "Escape") encerrar();
     };
@@ -129,47 +115,49 @@ export function IntroProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("touchmove", encerrar);
       window.removeEventListener("keydown", porTecla);
     };
-  }, [playing, encerrar]);
+  }, [tocando, encerrar]);
 
-  useEffect(() => {
-    if (decision !== "idle") return;
-    const timer = window.setTimeout(() => setFailsafe(true), 1200);
-    return () => window.clearTimeout(timer);
-  }, [decision]);
-
-  // O atraso vem da decisão (estável), não do fim da intro: assim a transição
-  // do Hero não é reiniciada quando o overlay sai.
-  // O Hero entra pouco antes de a cortina subir: uma timeline só.
-  const delay = pulou ? 0.1 : decision === "play" ? HERO_DELAY : 0;
+  // O atraso é estável durante a exibição, então a entrada do Hero não é
+  // reiniciada quando a cortina sai.
+  const delay = pulou ? 0.1 : tocando ? tempos.heroDelay : 0;
 
   return (
-    <IntroContext.Provider
-      value={{ ready: decision !== "idle" || failsafe, delay }}
-    >
+    <IntroContext.Provider value={{ ready: montado, delay }}>
       <AnimatePresence>
-        {playing && <IntroOverlay onSkip={encerrar} />}
+        {tocando && (
+          <IntroOverlay key={rodada} reduced={reduced} onSkip={encerrar} />
+        )}
       </AnimatePresence>
       {children}
     </IntroContext.Provider>
   );
 }
 
-function IntroOverlay({ onSkip }: { onSkip: () => void }) {
+function IntroOverlay({
+  reduced,
+  onSkip,
+}: {
+  reduced: boolean;
+  onSkip: () => void;
+}) {
+  const base = reduced ? CALMO.exit : EXIT;
   // A saída é mais rápida quando o visitante pula; guardamos a duração em
   // estado para que o `exit` use o mesmo valor que o clique acabou de definir.
-  const [exitDur, setExitDur] = useState(EXIT);
+  const [exitDur, setExitDur] = useState(base);
   const [saindo, setSaindo] = useState(false);
   // Mesmo contador que a logo do cabeçalho usa: um incremento, uma piscadinha.
   const [wink, setWink] = useState(0);
 
   useEffect(() => {
-    const piscada = window.setTimeout(() => setWink(1), WINK_AT * 1000);
-    const cortina = window.setTimeout(() => setSaindo(true), HOLD * 1000);
+    const quando = (reduced ? CALMO.wink : WINK_AT) * 1000;
+    const espera = (reduced ? CALMO.hold : HOLD) * 1000;
+    const piscada = window.setTimeout(() => setWink(1), quando);
+    const cortina = window.setTimeout(() => setSaindo(true), espera);
     return () => {
       window.clearTimeout(piscada);
       window.clearTimeout(cortina);
     };
-  }, []);
+  }, [reduced]);
 
   const pular = () => {
     setExitDur(EXIT_SKIP);
@@ -177,16 +165,22 @@ function IntroOverlay({ onSkip }: { onSkip: () => void }) {
     onSkip();
   };
 
+  /* Com movimento reduzido a saída é um fade; no resto, a cortina sobe e
+     revela o site por baixo. Em ambos os casos o site fica utilizável mesmo
+     se a animação travar: `pointer-events` já cai quando a saída começa. */
+  const saida = reduced
+    ? { opacity: 0, transition: { duration: exitDur, ease: EASE } }
+    : {
+        clipPath: "inset(100% 0 0% 0)",
+        transition: { duration: exitDur, ease: EASE },
+      };
+
   return (
     <motion.div
       className="brand-intro"
-      // durante a saída a cortina não pode mais interceptar cliques do Hero
       style={{ pointerEvents: saindo ? "none" : "auto" }}
-      initial={{ clipPath: "inset(0% 0 0% 0)" }}
-      exit={{
-        clipPath: "inset(100% 0 0% 0)",
-        transition: { duration: exitDur, ease: EASE },
-      }}
+      initial={reduced ? { opacity: 1 } : { clipPath: "inset(0% 0 0% 0)" }}
+      exit={saida}
     >
       <motion.div
         className="brand-intro-stage"
@@ -198,7 +192,9 @@ function IntroOverlay({ onSkip }: { onSkip: () => void }) {
       >
         {/* A entrada é CSS (ver .brand-intro-logo): a distância sai de
             calc(-50vw - 60%), então ele começa fora da tela em qualquer
-            largura, sem número mágico e sem rolagem horizontal. */}
+            largura, sem número mágico e sem rolagem horizontal. Com movimento
+            reduzido o corte global do CSS zera esse deslize e ele já aparece
+            no centro. */}
         <BrandSymbol
           className="brand-intro-logo"
           wink={wink}
@@ -206,10 +202,12 @@ function IntroOverlay({ onSkip }: { onSkip: () => void }) {
         />
         <span className="brand-intro-line">
           <motion.span
-            initial={{ y: "115%" }}
+            initial={{ y: reduced ? "0%" : "115%" }}
             animate={{
               y: "0%",
-              transition: { duration: 0.7, delay: 0.5, ease: EASE },
+              transition: reduced
+                ? { duration: 0 }
+                : { duration: 0.7, delay: 0.5, ease: EASE },
             }}
           >
             {siteConfig.slogan}
@@ -217,21 +215,23 @@ function IntroOverlay({ onSkip }: { onSkip: () => void }) {
         </span>
         <motion.i
           className="brand-intro-rule"
-          initial={{ scaleX: 0 }}
+          initial={{ scaleX: reduced ? 1 : 0 }}
           animate={{
             scaleX: 1,
-            transition: { duration: 0.4, delay: 0.95, ease: EASE },
+            transition: reduced
+              ? { duration: 0 }
+              : { duration: 0.4, delay: 0.95, ease: EASE },
           }}
         />
       </motion.div>
       <motion.span
         className="brand-intro-glow"
         aria-hidden="true"
-        initial={{ opacity: 0, scale: 0.6 }}
+        initial={{ opacity: reduced ? 0.5 : 0, scale: reduced ? 1 : 0.6 }}
         animate={{
-          opacity: [0, 0.9, 0.5],
+          opacity: reduced ? 0.5 : [0, 0.9, 0.5],
           scale: 1,
-          transition: { duration: 1.4, ease: EASE },
+          transition: reduced ? { duration: 0 } : { duration: 1.4, ease: EASE },
         }}
         exit={{ opacity: 0, transition: { duration: 0.4 } }}
       />
@@ -239,8 +239,11 @@ function IntroOverlay({ onSkip }: { onSkip: () => void }) {
         type="button"
         className="brand-intro-skip"
         onClick={pular}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: 0.4, delay: 0.7 } }}
+        initial={{ opacity: reduced ? 1 : 0 }}
+        animate={{
+          opacity: 1,
+          transition: reduced ? { duration: 0 } : { duration: 0.4, delay: 0.7 },
+        }}
         exit={{ opacity: 0, transition: { duration: 0.2 } }}
       >
         Pular intro

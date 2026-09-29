@@ -62,15 +62,14 @@ export default function RootLayout({
       }
     >
       <body>
-        {/* Decide a intro antes da hidratação: o fundo da marca já é pintado
-            na primeira renderização, então o Hero não pisca antes da cortina.
-            O timer interno devolve a página mesmo que o React nunca monte. */}
+        {/* Pinta o fundo da marca já na primeira renderização, antes da
+            hidratação, para a home não piscar antes da intro montar. Sem
+            memória de sessão: a intro é para tocar sempre. O timer interno
+            devolve a página mesmo que o React nunca monte. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var d=document.documentElement;
 if(location.pathname!=="/")return;
-if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-if(sessionStorage.getItem("decalq:intro")==="1")return;
 d.dataset.intro="play";
 setTimeout(function(){if(d.dataset.intro==="play")d.dataset.intro="done"},5000)}catch(e){}})()`,
           }}
