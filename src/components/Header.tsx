@@ -3,7 +3,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  FolderOpen,
+  Layers3,
+  MessageCircle,
+  Menu,
+  Sparkles,
+  Users,
+  X,
+} from "lucide-react";
 import { siteConfig } from "@/config/site";
 import type { NavigationItem } from "@/types/content";
 import { EASE, useReducedMotion } from "./Motion";
@@ -17,6 +26,15 @@ const links: NavigationItem[] = [
   { label: "Tecnologias", href: "/#tecnologias" },
   { label: "Contato", href: "/contato" },
 ];
+
+/* Ícones apoiam os rótulos sem substituí-los. */
+const navIcons: Record<string, typeof FolderOpen> = {
+  "/projetos": FolderOpen,
+  "/servicos": Sparkles,
+  "/sobre": Users,
+  "/#tecnologias": Layers3,
+  "/contato": MessageCircle,
+};
 
 /**
  * A marca tem três alvos distintos, todos irmãos (nada de botão dentro de
@@ -143,6 +161,7 @@ export function Header() {
         <nav className="desktop-nav" aria-label="Navegação principal">
           {links.map(({ label, href }) => {
             const isActive = active === href;
+            const Icon = navIcons[href];
             return (
               <Link
                 key={label}
@@ -150,6 +169,7 @@ export function Header() {
                 className={isActive ? "active" : ""}
                 aria-current={isActive ? "page" : undefined}
               >
+                {Icon && <Icon size={14} aria-hidden="true" />}
                 {label}
                 {isActive && (
                   <motion.span
@@ -203,7 +223,13 @@ export function Header() {
                   onClick={() => setOpen(false)}
                   aria-current={active === href ? "page" : undefined}
                 >
-                  {label}
+                  <span className="mobile-menu-rotulo">
+                    {(() => {
+                      const Icon = navIcons[href];
+                      return Icon ? <Icon size={17} aria-hidden="true" /> : null;
+                    })()}
+                    {label}
+                  </span>
                   <ArrowUpRight size={20} />
                 </Link>
               </motion.div>

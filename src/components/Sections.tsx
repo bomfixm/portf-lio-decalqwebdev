@@ -29,13 +29,11 @@ const icons = {
 };
 
 export function SectionTitle({
-  number,
   label,
   title,
   description,
   children,
 }: {
-  number: string;
   label: string;
   title: React.ReactNode;
   description?: string;
@@ -44,9 +42,7 @@ export function SectionTitle({
   return (
     <div className="section-heading">
       <Reveal variant="up">
-        <div className="eyebrow">
-          {number} / {label}
-        </div>
+        <div className="eyebrow">{label}</div>
         <h2>{title}</h2>
         {description && <p>{description}</p>}
       </Reveal>
@@ -63,7 +59,9 @@ export function SectionTitle({
    automação/api/ia ocupam 2 colunas e custom/data fecham as linhas. */
 const bentoSize: Record<string, string> = {
   web: "span-2 tall",
-  social: "span-2 tall",
+  /* `claro` inverte a superfície: a página alterna impacto e leitura em vez
+     de repetir o mesmo card escuro em toda a grade. */
+  social: "span-2 tall claro",
   automation: "span-2",
   custom: "",
   data: "",
@@ -156,7 +154,6 @@ export function Services({ expanded = false }: { expanded?: boolean }) {
   return (
     <section id="servicos" className="section container" data-tone="services">
       <SectionTitle
-        number="03"
         label="O que fazemos"
         title={
           <>
@@ -166,12 +163,13 @@ export function Services({ expanded = false }: { expanded?: boolean }) {
         description="Tecnologia sob medida para cada necessidade."
       />
       <Stagger className="bento" stagger={0.07}>
-        {services.map((s, i) => {
+        {services.map((s) => {
           const Icon = icons[s.icon];
           return (
             <StaggerItem
               key={s.id}
               className={`bento-item ${bentoSize[s.id] ?? ""}`}
+              data-svc={s.id}
               variant="scale"
             >
               <BentoDeco id={s.id} />
@@ -179,7 +177,6 @@ export function Services({ expanded = false }: { expanded?: boolean }) {
                 <span className="bento-icon">
                   <Icon size={22} strokeWidth={1.5} />
                 </span>
-                <span className="bento-num">0{i + 1}</span>
               </div>
               <h3>{s.title}</h3>
               <p>{s.description}</p>
@@ -204,7 +201,6 @@ export function Technologies() {
   return (
     <section id="tecnologias" className="section container" data-tone="stack">
       <SectionTitle
-        number="04"
         label="Nossa stack"
         title={
           <>
@@ -240,7 +236,6 @@ export function Process() {
   return (
     <section className="section container" id="processo" data-tone="process">
       <SectionTitle
-        number="05"
         label="Nosso processo"
         title={
           <>

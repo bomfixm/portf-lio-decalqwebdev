@@ -46,7 +46,6 @@ export default function Home() {
         data-tone="projects"
       >
         <SectionTitle
-          number="02"
           label="Ideias em prática"
           title={
             <>

@@ -8,10 +8,14 @@ export const siteConfig = {
     "https://estudio-solucoes-digitais-portfolio.bomfixm.chatgpt.site",
   logo: "/brand/logo.png",
   accent: "#6ea8ff",
+  /* Contato real. O botão do WhatsApp só aparece com um número válido
+     aqui: país + DDD + número, ex. "5511999999999". */
   email: "",
   whatsapp: "",
+  /* Opcional: número usado nas prospecções (links com ?origem=whatsapp).
+     Vazio = usa o mesmo `whatsapp` acima. */
+  whatsappProspeccao: "",
   instagram: "",
   linkedin: "",
   github: "",
-  contactEndpoint: process.env.NEXT_PUBLIC_CONTACT_ENDPOINT || "",
 };

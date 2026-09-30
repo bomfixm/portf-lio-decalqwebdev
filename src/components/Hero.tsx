@@ -1,46 +1,25 @@
 "use client";
-import type { CSSProperties } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  ArrowDown,
-  ArrowUpRight,
-  Check,
-  Command,
-  Layers3,
-  SlidersHorizontal,
-  Sparkles,
-  Zap,
-} from "lucide-react";
 import { PrimaryButton, SecondaryButton } from "./Button";
-import {
-  Counter,
-  EASE,
-  Parallax,
-  useMouseTilt,
-  useReducedMotion,
-} from "./Motion";
+import { EASE, useReducedMotion } from "./Motion";
 import { useIntro } from "./Intro";
 import { projects } from "@/data/projects";
-import { processSteps, services } from "@/data/services";
-import { technologyGroups } from "@/data/technologies";
 
-/* Sequência cinematográfica: cada bloco entra em ordem. `offset` continua a
-   timeline da intro, para não existir corte entre uma e outra. */
+/* A abertura continua a timeline da intro: `offset` evita corte entre uma e
+   outra. Um único momento orquestrado — depois disso a página fica quieta. */
 const seq = (i: number, offset = 0) => ({
-  duration: 0.9,
+  duration: 0.8,
   ease: EASE,
-  delay: offset + 0.15 + i * 0.12,
+  delay: offset + 0.1 + i * 0.09,
 });
 
-const stats = [
-  { value: projects.filter((p) => !p.demo).length, label: "Cases" },
-  { value: services.length, label: "Frentes" },
-  {
-    value: technologyGroups.reduce((n, g) => n + g.items.length, 0),
-    label: "Tecnologias",
-  },
-  { value: processSteps.length, label: "Etapas" },
-];
+/** Endereço do site, como apareceria na barra de um navegador. */
+const endereco = (p: { liveUrl?: string; slug: string }) =>
+  p.liveUrl
+    ? p.liveUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")
+    : `${p.slug}.decalq`;
 
 export function Hero() {
   const reduced = useReducedMotion();
@@ -48,296 +27,107 @@ export function Hero() {
   const initial = reduced ? false : "hidden";
   // Enquanto não sabemos se a intro vai rodar, o Hero espera.
   const show = reduced || ready ? "visible" : "hidden";
+
+  const vitrine = projects.filter((p) => p.featured && !p.demo).slice(0, 3);
+
+  const sobe = {
+    hidden: { opacity: 0, y: 18 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <div className="hero-wrap">
       <motion.div
         className="hero-glow"
         aria-hidden="true"
-        initial={reduced ? false : { opacity: 0, scale: 0.8 }}
-        animate={ready || reduced ? { opacity: 1, scale: 1 } : undefined}
+        initial={reduced ? false : { opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.6, ease: EASE, delay }}
       />
       <section className="hero container" data-tone="hero">
-        <div className="hero-copy">
-          <motion.div
-            className="eyebrow"
-            variants={{
-              hidden: { opacity: 0, x: -12 },
-              visible: { opacity: 1, x: 0 },
-            }}
-            initial={initial}
-            animate={show}
-            transition={seq(0, delay)}
-          >
-            Estúdio de tecnologia &amp; desenvolvimento
-          </motion.div>
-
-          <motion.h1
-            initial={initial}
-            animate={show}
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.11,
-                  delayChildren: delay + 0.3,
-                },
-              },
-            }}
-          >
-            {[
-              <>Transformamos</>,
-              <>problemas em</>,
-              <span className="gradient-text" key="g">
-                soluções digitais.
-              </span>,
-            ].map((line, i) => (
-              <span
-                key={i}
-                style={{
-                  display: "block",
-                  overflow: "hidden",
-                  paddingBottom: "0.1em",
-                  marginBottom: "-0.1em",
-                }}
-              >
-                <motion.span
-                  style={{ display: "block" }}
-                  variants={{
-                    hidden: { y: "110%", rotate: 2 },
-                    visible: {
-                      y: "0%",
-                      rotate: 0,
-                      transition: { duration: 1, ease: EASE },
-                    },
-                  }}
-                >
-                  {line}
-                </motion.span>
-              </span>
-            ))}
+        <div className="hero-lead">
+          <motion.h1 initial={initial} animate={show} variants={sobe} transition={seq(0, delay)}>
+            Transformamos problemas
+            <br />
+            em soluções digitais.
           </motion.h1>
 
           <motion.p
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              visible: { opacity: 1, y: 0 },
-            }}
             initial={initial}
             animate={show}
-            transition={seq(4, delay)}
+            variants={sobe}
+            transition={seq(1, delay)}
           >
-            Desenvolvemos sites, sistemas, automações e ferramentas
-            personalizadas que simplificam processos e transformam ideias em
-            produtos reais.
+            Sites, sistemas e automações que simplificam processos e
+            transformam ideias em produtos reais.
           </motion.p>
 
           <motion.div
             className="hero-actions"
-            variants={{
-              hidden: { opacity: 0, y: 16 },
-              visible: { opacity: 1, y: 0 },
-            }}
             initial={initial}
             animate={show}
-            transition={seq(5, delay)}
+            variants={sobe}
+            transition={seq(2, delay)}
           >
-            <PrimaryButton href="/projetos">Conhecer projetos</PrimaryButton>
-            <SecondaryButton href="/contato">Falar conosco</SecondaryButton>
-          </motion.div>
-
-          <motion.div
-            className="hero-foot"
-            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-            initial={initial}
-            animate={show}
-            transition={seq(6, delay)}
-          >
-            <div className="hero-stats" aria-label="Resumo do portfólio">
-              {stats.map((s) => (
-                <div className="hero-stat" key={s.label}>
-                  <strong>
-                    <Counter to={s.value} />
-                  </strong>
-                  <span>{s.label}</span>
-                </div>
-              ))}
-            </div>
-            <a
-              href="#projetos"
-              className="scroll-cue"
-              aria-label="Ir aos projetos"
-            >
-              <ArrowDown size={16} />
-            </a>
+            <PrimaryButton href="/projetos">Ver os projetos</PrimaryButton>
+            <SecondaryButton href="/contato">Falar com a gente</SecondaryButton>
           </motion.div>
         </div>
 
-        <Parallax speed={-0.12} className="hero-art-parallax">
-          <HeroScene ready={reduced || ready} delay={delay} />
-        </Parallax>
+        {/* Vitrine: três janelas com trabalho no ar. O cromo (cantos, pontos,
+            endereço) é a linguagem do próprio símbolo da marca. */}
+        <motion.div
+          className="vitrine"
+          initial={initial}
+          animate={show}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.09, delayChildren: delay + 0.35 } },
+          }}
+        >
+          {vitrine.map((p) => (
+            <motion.article
+              className="janela"
+              key={p.slug}
+              /* Nunca condicionar `variants`: sem alvo definido o elemento
+                 fica preso no estado inicial. Com movimento reduzido o
+                 estado oculto é igual ao visível. */
+              variants={{
+                hidden: { opacity: reduced ? 1 : 0, y: reduced ? 0 : 26 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.7, ease: EASE }}
+            >
+              <div className="janela-cromo">
+                <span className="janela-pontos" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="janela-url">{endereco(p)}</span>
+              </div>
+              <Link href={`/projetos/${p.slug}`} className="janela-tela">
+                <Image
+                  src={p.cover}
+                  alt={`Site da ${p.title}`}
+                  width={1200}
+                  height={780}
+                  priority
+                  sizes="(max-width: 900px) 88vw, 420px"
+                />
+              </Link>
+              <div className="janela-pe">
+                <h2>{p.title}</h2>
+                <p>{p.shortDescription}</p>
+                <Link href={`/projetos/${p.slug}`} className="janela-link">
+                  Ver o case
+                </Link>
+              </div>
+            </motion.article>
+          ))}
+        </motion.div>
       </section>
       <div className="hero-line" aria-hidden="true" />
-    </div>
-  );
-}
-
-function HeroScene({ ready, delay }: { ready: boolean; delay: number }) {
-  const reduced = useReducedMotion();
-  const { ref, rotateX, rotateY } = useMouseTilt(3.5);
-  return (
-    // A entrada é feita por CSS (ver .hero-art em globals.css): assim a cena
-    // nunca depende do JavaScript para ficar visível. O atraso é só uma
-    // variável, para continuar a timeline da intro quando ela existe.
-    <div
-      className="hero-art"
-      aria-label="Composição de interfaces demonstrativas"
-      role="img"
-      style={
-        { "--enter-delay": `${ready ? delay + 0.15 : 0.15}s` } as CSSProperties
-      }
-    >
-      <motion.div
-        ref={ref}
-        className="hero-art-inner"
-        style={reduced ? undefined : { rotateX, rotateY }}
-      >
-        <div className="art-caption">
-          <span>Ideias conectadas. Soluções reais.</span>
-          <span>01 — 06</span>
-        </div>
-
-        <motion.div
-          className="app-window"
-          animate={reduced ? undefined : { y: [0, -6, 0] }}
-          transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
-        >
-          <div className="window-top">
-            <span className="window-dots" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
-            <span>workspace / visão geral</span>
-            <Command size={13} />
-          </div>
-          <div className="app-body">
-            <aside>
-              <span className="app-symbol">✳</span>
-              <Layers3 size={17} />
-              <SlidersHorizontal size={17} />
-              <span className="side-line" />
-              <span className="side-line" />
-            </aside>
-            <div className="app-main">
-              <div className="app-heading">
-                <div>
-                  <small>Seu trabalho, organizado.</small>
-                  <h3>Visão geral</h3>
-                </div>
-                <span className="mini-tag">Demonstração</span>
-              </div>
-              <div className="stat-row">
-                <div>
-                  <small>Projetos</small>
-                  <strong>
-                    Em movimento <ArrowUpRight size={14} />
-                  </strong>
-                </div>
-                <div>
-                  <small>Processos</small>
-                  <strong>
-                    Conectados <span className="status-dot" />
-                  </strong>
-                </div>
-              </div>
-              <div className="chart-title">
-                Atividade do projeto<span>Esta semana</span>
-              </div>
-              <div className="chart">
-                <svg
-                  viewBox="0 0 430 130"
-                  aria-label="Gráfico ilustrativo, sem métricas reais"
-                  role="img"
-                >
-                  <defs>
-                    <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop stopColor="var(--primary)" stopOpacity=".28" />
-                      <stop
-                        offset="1"
-                        stopColor="var(--primary)"
-                        stopOpacity="0"
-                      />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    className="chart-fill"
-                    d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22 L430 130 L0 130Z"
-                    fill="url(#chart-fill)"
-                  />
-                  <path
-                    className="chart-line"
-                    d="M0 110 L40 96 L80 102 L125 67 L160 78 L205 44 L250 55 L300 18 L340 28 L390 12 L430 22"
-                    fill="none"
-                    stroke="var(--primary)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-              <div className="chart-days">
-                <span>SEG</span>
-                <span>TER</span>
-                <span>QUA</span>
-                <span>QUI</span>
-                <span>SEX</span>
-              </div>
-              <div className="task-line">
-                <Check size={13} /> Estrutura pronta para evoluir{" "}
-                <span>Concluído</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="code-window">
-          <motion.div
-            animate={reduced ? undefined : { y: [0, 5, 0] }}
-            transition={{
-              duration: 6,
-              ease: "easeInOut",
-              repeat: Infinity,
-              delay: 1,
-            }}
-          >
-            <div className="code-title">
-              <span className="code-dot" /> automation.py <span>PYTHON</span>
-            </div>
-            <pre>
-              <span>def</span> <span className="fn">transformar</span>(ideia):
-              {"\n"} problema = entender(ideia)
-              {"\n"} solução = desenvolver(problema)
-              {"\n"} <span>return</span> solução
-              <span className="code-caret" aria-hidden="true" />
-            </pre>
-            <div className="code-bottom">
-              <Check size={13} /> Menos tarefas. Mais possibilidades.
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="float-chip a">
-          <Zap size={12} /> Automação ativa
-        </div>
-        <div className="float-chip b">
-          <Sparkles size={12} /> Interface responsiva
-        </div>
-
-        <div className="art-bottom">
-          <span>Design + código + propósito</span>
-          <span>↓</span>
-        </div>
-      </motion.div>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { CursorGlow } from "@/components/CursorGlow";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { IntroProvider } from "@/components/Intro";
 import { ScrollMemory } from "@/components/ScrollMemory";
+import { CapturaOrigem } from "@/components/CapturaOrigem";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -80,6 +81,7 @@ setTimeout(function(){if(d.dataset.intro==="play")d.dataset.intro="done"},5000)}
         <IntroProvider>
           <SmoothScroll />
           <ScrollMemory />
+          <CapturaOrigem />
           <Background />
           <CursorGlow />
           <Header />
