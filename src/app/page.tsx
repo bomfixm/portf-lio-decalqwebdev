@@ -4,6 +4,7 @@ import { Ticker } from "@/components/Ticker";
 import { CTA } from "@/components/Footer";
 import { FeaturedProjects } from "@/components/FeaturedProjects";
 import { SocialShowcase } from "@/components/SocialShowcase";
+import { DuasImagens } from "@/components/DuasImagens";
 import { HorizontalGallery } from "@/components/HorizontalGallery";
 import {
   SectionTitle,
@@ -40,6 +41,7 @@ export default function Home() {
         </Reveal>
         <div className="intro-line" aria-hidden="true" />
       </section>
+      <DuasImagens />
       <section
         className="section no-line container"
         id="projetos"

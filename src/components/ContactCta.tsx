@@ -3,6 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { linkWhatsApp, mensagemWhatsApp, numeroDaVez } from "@/lib/contact";
+import { registrarEvento } from "@/lib/metricas";
 import { useOrigem } from "@/lib/origem";
 import { Button } from "./Button";
 
@@ -32,7 +33,13 @@ export function ContactCta() {
       </p>
 
       {href ? (
-        <Button href={href} external large className="contact-card-cta">
+        <Button
+          href={href}
+          external
+          large
+          className="contact-card-cta"
+          onClick={() => registrarEvento("whatsapp_clique")}
+        >
           {continuando
             ? "Continuar nossa conversa no WhatsApp"
             : "Conversar sobre meu projeto"}

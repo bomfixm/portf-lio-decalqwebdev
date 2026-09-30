@@ -750,6 +750,8 @@ html.lenis body {
   font-weight: 600;
   white-space: nowrap;
   text-transform: uppercase;
+  min-height: 24px;
+  align-items: center;
 }
 .brand-logo {
   height: 36px;
@@ -1909,6 +1911,8 @@ html.lenis body {
   gap: 8px;
   margin-top: 22px;
   transition: color var(--dur-base);
+  min-height: 24px;
+  padding: 2px 0;
 }
 .service-link svg {
   transition: transform var(--dur-base) var(--ease-out);
@@ -4929,4 +4933,211 @@ body:has(dialog[open]) {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* =========================================================================
+   PAR DE IMAGENS — duas telas reais com o desfoque só na junção
+   ========================================================================= */
+.par {
+  margin-top: var(--section-y);
+}
+.par-quadro {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: 0 50px 110px -50px rgba(0, 0, 0, 0.95);
+}
+.par-lado {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+/* a altura vem do lado esquerdo; o direito acompanha, para a sobreposição
+   não desalinhar as legendas */
+.par-lado.a {
+  aspect-ratio: 4 / 3;
+}
+.par-lado.b {
+  height: 100%;
+}
+.par-lado img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform var(--dur-slower) var(--ease-out);
+}
+.par-lado:hover img {
+  transform: scale(1.03);
+}
+/* a segunda entra por cima da primeira: as duas se tocam, não se encostam */
+.par-lado.b {
+  margin-left: -8%;
+  z-index: 1;
+}
+.par-lado figcaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 44px 22px 18px;
+  background: linear-gradient(180deg, transparent, rgba(6, 9, 14, 0.94));
+}
+.par-lado.b figcaption {
+  padding-left: calc(8% + 22px);
+}
+.par-lado figcaption a {
+  font-family: var(--font-display, var(--font-display-fallback));
+  font-size: clamp(16px, 1.4vw, 21px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.par-lado figcaption a:hover {
+  color: var(--primary-light);
+}
+.par-lado figcaption span {
+  flex: none;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+/* A costura fica sobre a linha onde as duas se encontram. O blur é aplicado
+   ao que passa por baixo, e a máscara concentra o efeito no centro dela —
+   o miolo de cada imagem continua nítido. */
+.par-costura {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 41%;
+  z-index: 1;
+  width: 20%;
+  pointer-events: none;
+  backdrop-filter: blur(26px) saturate(1.1);
+  -webkit-backdrop-filter: blur(26px) saturate(1.1);
+  mask-image: linear-gradient(90deg, transparent, #000 38%, #000 62%, transparent);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 38%,
+    #000 62%,
+    transparent
+  );
+}
+
+@media (max-width: 860px) {
+  .par-quadro {
+    grid-template-columns: 1fr;
+  }
+  .par-lado {
+    aspect-ratio: 16 / 11;
+  }
+  .par-lado.b {
+    margin-left: 0;
+    margin-top: -10%;
+  }
+  .par-lado.b figcaption {
+    padding-left: 22px;
+  }
+  /* no celular a junção é horizontal */
+  .par-costura {
+    top: 46%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: auto;
+    height: 12%;
+    mask-image: linear-gradient(180deg, transparent, #000 45%, #000 55%, transparent);
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent,
+      #000 45%,
+      #000 55%,
+      transparent
+    );
+  }
+}
+
+/* =========================================================================
+   PAINEL DE MÉTRICAS — o vazio é informação: sem fonte, sem número
+   ========================================================================= */
+.metricas {
+  padding-bottom: var(--section-y);
+}
+.metricas-aviso {
+  max-width: 62ch;
+  margin-bottom: clamp(36px, 4vw, 56px);
+  padding: clamp(22px, 2.4vw, 32px);
+  border: 1px dashed rgb(var(--primary-rgb) / 0.4);
+  border-radius: var(--radius-lg);
+  background: rgb(var(--primary-rgb) / 0.05);
+}
+.metricas-aviso strong {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-display, var(--font-display-fallback));
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--primary-light);
+}
+.metricas-aviso p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.metricas-falta {
+  margin-top: 12px;
+  font-size: 14.5px;
+  color: var(--text-tertiary);
+}
+.metricas-falta code {
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: 13px;
+  color: var(--primary-light);
+}
+.metricas-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 16px;
+}
+.metricas-item {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(22px, 2.2vw, 30px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-glass);
+}
+.metricas-item h2 {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.metricas-valor {
+  margin: 10px 0 14px;
+  font-family: var(--font-display, var(--font-display-fallback));
+  font-size: clamp(34px, 3.4vw, 46px);
+  line-height: 1;
+  color: var(--text-tertiary);
+}
+.metricas-significado {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.metricas-limite {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-tertiary);
 }

@@ -20,6 +20,8 @@ interface ButtonProps {
   sameTab?: boolean;
   /** Hover magnético (desktop). Desligue em botões dentro de áreas densas. */
   magnetic?: boolean;
+  /** Gancho de instrumentação (ver src/lib/metricas.ts). */
+  onClick?: () => void;
 }
 
 /**
@@ -37,6 +39,7 @@ export function Button({
   external = false,
   sameTab = false,
   magnetic = true,
+  onClick,
 }: ButtonProps) {
   const onPointerMove = usePointerVars<HTMLAnchorElement>();
   const resolved: Variant = variant ?? (secondary ? "secondary" : "primary");
@@ -63,11 +66,17 @@ export function Button({
       target={sameTab ? undefined : "_blank"}
       rel={sameTab ? undefined : "noopener noreferrer"}
       onPointerMove={onPointerMove}
+      onClick={onClick}
     >
       {content}
     </a>
   ) : (
-    <Link className={classes} href={href} onPointerMove={onPointerMove}>
+    <Link
+      className={classes}
+      href={href}
+      onPointerMove={onPointerMove}
+      onClick={onClick}
+    >
       {content}
     </Link>
   );

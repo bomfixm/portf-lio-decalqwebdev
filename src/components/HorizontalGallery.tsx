@@ -7,10 +7,13 @@ import type { Project } from "@/types/project";
 import { ProjectCard } from "./ProjectCard";
 import { EASE, useMediaQuery, useReducedMotion } from "./Motion";
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 40 },
+/* Com movimento reduzido o estado oculto é igual ao visível: os cards nunca
+   dependem do `whileInView` para existir. Numa faixa desta altura o gatilho
+   pode simplesmente não chegar, e aí eles ficariam invisíveis para sempre. */
+const itemVariants = (reduced: boolean) => ({
+  hidden: { opacity: reduced ? 1 : 0, y: reduced ? 0 : 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } },
-};
+});
 
 /**
  * Galeria horizontal guiada pelo scroll vertical.
@@ -86,7 +89,7 @@ export function HorizontalGallery({
           style={{ x }}
           initial={reduced ? false : "hidden"}
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={{
             hidden: {},
             visible: { transition: { staggerChildren: 0.12 } },
@@ -105,7 +108,7 @@ export function HorizontalGallery({
             <motion.div
               key={p.id}
               className="hgal-item"
-              variants={itemVariants}
+              variants={itemVariants(reduced)}
             >
               <ProjectCard
                 project={p}
